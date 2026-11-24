@@ -1,0 +1,3082 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>ラブライブフロンティア</title>
+<style>
+  :root {
+    --bg-outer: #070913;
+    --panel-bg: rgba(14, 19, 38, 0.94);
+    --panel-border: rgba(120, 175, 255, 0.28);
+    --accent-orange: #ff7a2f;
+    --accent-cyan: #38e8ff;
+    --accent-pink: #ff5ca8;
+    --accent-gold: #ffd24c;
+    --text-main: #f4f7ff;
+    --text-sub: #9fb0d4;
+    --hp-col: #38e08a;
+    --wp-col: #ff8b3d;
+    --jp-col: #57a6ff;
+    --lp-col: #ff5983;
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100dvh;
+    background: radial-gradient(circle at 50% 20%, #162044 0%, var(--bg-outer) 75%);
+    color: var(--text-main);
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #game-shell {
+    position: relative;
+    width: min(100vw, calc(100dvh * 9 / 16));
+    height: min(100dvh, calc(100vw * 16 / 9));
+    aspect-ratio: 9 / 16;
+    background: #0b0f22;
+    border: 1px solid rgba(130, 185, 255, 0.28);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.85), 0 0 24px rgba(56, 232, 255, 0.14);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  #top-bar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 6px 8px;
+    background: linear-gradient(90deg, rgba(16, 24, 52, 0.98), rgba(28, 18, 48, 0.98));
+    border-bottom: 1px solid var(--panel-border);
+    z-index: 20;
+  }
+
+  .brand-title {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    background: linear-gradient(90deg, #ff9642, #ffd24c, #38e8ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    white-space: nowrap;
+  }
+
+  .region-badge {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(56, 232, 255, 0.14);
+    border: 1px solid rgba(56, 232, 255, 0.45);
+    color: var(--accent-cyan);
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 170px;
+  }
+
+  .top-actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .mini-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-main);
+    border-radius: 6px;
+    padding: 4px 7px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .mini-btn:active, .mini-btn.active {
+    background: rgba(56, 232, 255, 0.25);
+    border-color: var(--accent-cyan);
+  }
+
+  #stage-area {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .screen {
+    display: none;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .screen.active {
+    display: flex;
+  }
+
+  #title-screen {
+    justify-content: space-between;
+    padding: 14px 12px 12px;
+    background: radial-gradient(circle at 50% 18%, rgba(255, 122, 47, 0.24), rgba(14, 20, 44, 0.96) 65%);
+    overflow-y: auto;
+  }
+
+  .hero-banner {
+    text-align: center;
+    padding: 12px 10px;
+    border-radius: 12px;
+    background: rgba(10, 14, 30, 0.78);
+    border: 1px solid rgba(255, 210, 76, 0.35);
+  }
+
+  .hero-sub {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--accent-cyan);
+    font-weight: 700;
+  }
+
+  .hero-main {
+    margin: 4px 0 6px;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    color: #fff;
+    text-shadow: 0 0 14px rgba(255, 122, 47, 0.75);
+  }
+
+  .hero-desc {
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--text-sub);
+    margin: 0;
+  }
+
+  .story-box {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(9, 13, 28, 0.88);
+    border: 1px solid var(--panel-border);
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: #e8efff;
+    min-height: 132px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .story-speaker {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(255, 122, 47, 0.25);
+    border: 1px solid var(--accent-orange);
+    color: #ffb278;
+    margin-bottom: 6px;
+  }
+
+  .primary-btn {
+    width: 100%;
+    padding: 11px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 220, 120, 0.65);
+    background: linear-gradient(135deg, #ff6a26, #ff9d2e);
+    color: #111;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(255, 122, 47, 0.4);
+  }
+
+  .primary-btn:active {
+    transform: scale(0.985);
+  }
+
+  .secondary-btn {
+    width: 100%;
+    padding: 8px;
+    margin-top: 6px;
+    border-radius: 9px;
+    border: 1px solid rgba(56, 232, 255, 0.45);
+    background: rgba(56, 232, 255, 0.12);
+    color: var(--accent-cyan);
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  #cutscene-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10, 14, 32, 0.72) 0%, rgba(8, 11, 24, 0.96) 55%);
+    z-index: 40;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  #cutscene-overlay.open {
+    display: flex;
+  }
+
+  .cutscene-stage {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+  }
+
+  .cutscene-card {
+    width: 100%;
+    background: rgba(12, 18, 42, 0.96);
+    border: 1px solid var(--accent-gold);
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 0 24px rgba(0, 0, 0, 0.75);
+  }
+
+  .cutscene-top {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .cutscene-name-tag {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 900;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(255, 210, 76, 0.2);
+    border: 1px solid var(--accent-gold);
+    color: var(--accent-gold);
+    margin-bottom: 4px;
+  }
+
+  .cutscene-line {
+    font-size: 12px;
+    line-height: 1.55;
+    color: #f7faff;
+  }
+
+  #field-screen {
+    justify-content: space-between;
+    padding: 6px 8px 6px;
+    gap: 5px;
+  }
+
+  .field-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 5px 8px;
+    font-size: 10px;
+  }
+
+  .party-strip {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 2px 0;
+  }
+
+  .party-chip {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(20, 28, 56, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 8px;
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+
+  .party-chip.leader {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 8px rgba(255, 210, 76, 0.25);
+  }
+
+  .map-wrap {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #070b18;
+    border-radius: 10px;
+    border: 1px solid var(--panel-border);
+    overflow: hidden;
+  }
+
+  canvas#field-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+  }
+
+  .field-log {
+    flex: 0 0 auto;
+    background: rgba(9, 13, 28, 0.94);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-size: 10.5px;
+    line-height: 1.4;
+    min-height: 42px;
+    max-height: 52px;
+    overflow-y: auto;
+    color: #eef3ff;
+  }
+
+  .dpad-row {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    padding: 2px 16px;
+  }
+
+  .pad-btn {
+    padding: 7px 0;
+    border-radius: 8px;
+    border: 1px solid rgba(140, 190, 255, 0.3);
+    background: rgba(22, 32, 64, 0.92);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .pad-btn:active {
+    background: rgba(56, 232, 255, 0.3);
+    border-color: var(--accent-cyan);
+  }
+
+  .pad-spacer {
+    visibility: hidden;
+  }
+
+  #battle-screen {
+    position: relative;
+    justify-content: space-between;
+    padding: 5px 7px 6px;
+    gap: 4px;
+    background: radial-gradient(circle at 50% 25%, rgba(65, 35, 110, 0.45), rgba(8, 12, 26, 0.98) 72%);
+  }
+
+  #battle-screen.screen-shake {
+    animation: screenShake 0.34s cubic-bezier(.36,.07,.19,.97) both;
+  }
+
+  @keyframes screenShake {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    20% { transform: translate3d(-6px, 3px, 0); }
+    40% { transform: translate3d(6px, -3px, 0); }
+    60% { transform: translate3d(-4px, -2px, 0); }
+    80% { transform: translate3d(4px, 2px, 0); }
+  }
+
+  .battle-top-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    padding: 3px 7px;
+    border-radius: 7px;
+    background: rgba(12, 18, 38, 0.9);
+    border: 1px solid var(--panel-border);
+  }
+
+  .enemy-stage {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 122px;
+    max-height: 174px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 4px;
+    padding: 4px 4px 2px;
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(22, 18, 48, 0.55) 0%, rgba(12, 24, 48, 0.85) 100%);
+    border: 1px solid rgba(255, 92, 168, 0.3);
+    overflow: visible;
+  }
+
+  .enemy-stage.is-9vs9 {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    align-items: center;
+    gap: 2px;
+    max-height: 192px;
+    padding: 3px;
+  }
+
+  .enemy-unit {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    cursor: pointer;
+    min-width: 0;
+    transition: transform 0.15s ease, filter 0.15s ease;
+  }
+
+  .enemy-unit.selected {
+    transform: translateY(-4px) scale(1.04);
+    filter: drop-shadow(0 0 8px rgba(255, 210, 76, 0.85));
+  }
+
+  .enemy-unit.defeated {
+    opacity: 0.25;
+    filter: grayscale(1);
+  }
+
+  .enemy-hp-bar {
+    width: 92%;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 2px;
+  }
+
+  .enemy-hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff4b7d, #ff9d42);
+    transition: width 0.25s ease;
+  }
+
+  .enemy-label {
+    font-size: 8.5px;
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    color: #ffd6e7;
+  }
+
+  .anim-lunge-enemy {
+    animation: lungeEnemy 0.38s ease-out;
+    z-index: 25;
+  }
+
+  @keyframes lungeEnemy {
+    0% { transform: translate(0, 0) scale(1); }
+    45% { transform: translate(0, 24px) scale(1.2); }
+    100% { transform: translate(0, 0) scale(1); }
+  }
+
+  .anim-lunge-ally {
+    animation: lungeAlly 0.38s ease-out;
+    z-index: 25;
+  }
+
+  @keyframes lungeAlly {
+    0% { transform: translate(0, 0) scale(1); }
+    45% { transform: translate(0, -24px) scale(1.2); }
+    100% { transform: translate(0, 0) scale(1); }
+  }
+
+  .anim-hit {
+    animation: hitRecoil 0.36s ease-out;
+  }
+
+  @keyframes hitRecoil {
+    0% { transform: translateX(0); filter: brightness(2.6) saturate(2); }
+    25% { transform: translateX(-8px); filter: brightness(2.1); }
+    50% { transform: translateX(8px); filter: brightness(1.7); }
+    75% { transform: translateX(-4px); }
+    100% { transform: translateX(0); filter: none; }
+  }
+
+  /* Persistent VFX Layer inside #battle-screen so renderBattle() never wipes active effects */
+  #battle-vfx-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 35;
+    overflow: hidden;
+  }
+
+  .vfx-burst {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .vfx-slash-blade {
+    width: 112px;
+    height: 112px;
+    position: relative;
+    animation: slashSpin 0.56s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .vfx-slash-blade::before,
+  .vfx-slash-blade::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 118px;
+    height: 8px;
+    border-radius: 999px;
+    transform: translate(-50%, -50%) rotate(-36deg);
+    background: linear-gradient(90deg, transparent, #38e8ff 22%, #ffffff 50%, #ffd24c 78%, transparent);
+    box-shadow: 0 0 18px #38e8ff, 0 0 32px #ffd24c;
+  }
+
+  .vfx-slash-blade::after {
+    width: 96px;
+    height: 5px;
+    transform: translate(-50%, -50%) rotate(32deg);
+    background: linear-gradient(90deg, transparent, #ff7ab8 30%, #ffffff 55%, transparent);
+  }
+
+  @keyframes slashSpin {
+    0% { opacity: 1; transform: scale(0.35) rotate(-18deg); }
+    55% { opacity: 1; transform: scale(1.18) rotate(8deg); }
+    100% { opacity: 0; transform: scale(1.45) rotate(22deg); }
+  }
+
+  .vfx-slam-wave {
+    width: 104px;
+    height: 104px;
+    border-radius: 50%;
+    border: 7px solid #ff8b3d;
+    background: radial-gradient(circle, rgba(255, 240, 150, 0.85) 0%, rgba(255, 110, 35, 0.45) 45%, rgba(255, 50, 20, 0) 75%);
+    box-shadow: 0 0 28px rgba(255, 122, 47, 0.95);
+    animation: slamExpand 0.54s ease-out forwards;
+  }
+
+  @keyframes slamExpand {
+    0% { opacity: 1; transform: scale(0.25); }
+    65% { opacity: 1; transform: scale(1.25); }
+    100% { opacity: 0; transform: scale(1.55); }
+  }
+
+  .vfx-magic-circle {
+    width: 112px;
+    height: 112px;
+    border-radius: 50%;
+    border: 5px dashed #e879f9;
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.5) 0%, rgba(56, 232, 255, 0.25) 55%, transparent 75%);
+    box-shadow: 0 0 26px #c084fc, inset 0 0 22px #38e8ff;
+    animation: magicRotate 0.64s ease-out forwards;
+  }
+
+  @keyframes magicRotate {
+    0% { opacity: 1; transform: scale(0.3) rotate(0deg); }
+    65% { opacity: 1; transform: scale(1.2) rotate(175deg); }
+    100% { opacity: 0; transform: scale(1.45) rotate(260deg); }
+  }
+
+  .vfx-heal-aura {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    border: 6px solid #38e08a;
+    background: radial-gradient(circle, rgba(125, 255, 184, 0.65) 0%, rgba(56, 224, 138, 0.15) 70%, transparent);
+    box-shadow: 0 0 24px #38e08a;
+    animation: healRise 0.6s ease-out forwards;
+  }
+
+  @keyframes healRise {
+    0% { opacity: 1; transform: translateY(10px) scale(0.45); }
+    100% { opacity: 0; transform: translateY(-24px) scale(1.35); }
+  }
+
+  .dmg-popup-floating {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    font-weight: 900;
+    color: #fff36b;
+    text-shadow: 0 2px 0 #1e0818, 0 0 12px rgba(255, 70, 120, 1);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 38;
+    animation: dmgFloatUp 0.85s ease-out forwards;
+  }
+
+  .dmg-popup-floating.heal-pop {
+    color: #7dffb8;
+    text-shadow: 0 2px 0 #062616, 0 0 12px rgba(56, 224, 138, 1);
+  }
+
+  @keyframes dmgFloatUp {
+    0% { opacity: 1; transform: translate(-50%, -10%) scale(0.85); }
+    25% { opacity: 1; transform: translate(-50%, -45%) scale(1.22); }
+    100% { opacity: 0; transform: translate(-50%, -95%) scale(0.95); }
+  }
+
+  #fx-banner {
+    position: absolute;
+    top: 34%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.85);
+    pointer-events: none;
+    opacity: 0;
+    z-index: 36;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-align: center;
+    white-space: nowrap;
+    background: linear-gradient(135deg, rgba(255, 210, 76, 0.96), rgba(255, 102, 48, 0.96));
+    color: #140d08;
+    border: 2px solid #fff8cc;
+    box-shadow: 0 0 24px rgba(255, 210, 76, 0.9);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+
+  #fx-banner.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+
+  .allies-stage {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+
+  .allies-stage.is-9allies {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px;
+  }
+
+  .ally-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(14, 21, 45, 0.92);
+    border: 1px solid rgba(130, 180, 255, 0.25);
+    border-radius: 8px;
+    padding: 3px 3px 4px;
+    cursor: pointer;
+    min-width: 0;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+
+  .ally-card.active-turn {
+    border-color: var(--accent-gold);
+    background: rgba(42, 34, 18, 0.95);
+    box-shadow: 0 0 10px rgba(255, 210, 76, 0.45);
+  }
+
+  .ally-card.ko {
+    opacity: 0.45;
+    border-color: rgba(255, 89, 131, 0.5);
+  }
+
+  .ally-name {
+    font-size: 9px;
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .stat-mini {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    font-size: 8px;
+    line-height: 1.25;
+    padding: 0 2px;
+  }
+
+  .lp-tag {
+    color: var(--lp-col);
+    font-weight: 800;
+  }
+
+  .bar-track {
+    width: 100%;
+    height: 3.5px;
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 1px;
+  }
+
+  .bar-hp {
+    height: 100%;
+    background: var(--hp-col);
+    transition: width 0.25s ease;
+  }
+
+  .battle-bottom {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .tech-desc-box {
+    background: rgba(18, 28, 58, 0.96);
+    border: 1px solid rgba(255, 210, 76, 0.45);
+    border-radius: 7px;
+    padding: 5px 7px;
+    font-size: 9.8px;
+    line-height: 1.35;
+    color: #fff3c4;
+    min-height: 34px;
+  }
+
+  .battle-log {
+    background: rgba(8, 12, 26, 0.95);
+    border: 1px solid var(--panel-border);
+    border-radius: 7px;
+    padding: 4px 7px;
+    font-size: 10px;
+    line-height: 1.35;
+    height: 38px;
+    overflow-y: auto;
+    color: #eef3ff;
+  }
+
+  .cmd-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+
+  .cmd-btn {
+    padding: 6px 6px;
+    border-radius: 7px;
+    border: 1px solid rgba(145, 195, 255, 0.35);
+    background: rgba(20, 30, 62, 0.95);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    text-align: left;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .cmd-btn.armed {
+    border-color: var(--accent-gold);
+    background: rgba(65, 48, 16, 0.96);
+    box-shadow: 0 0 8px rgba(255, 210, 76, 0.5);
+  }
+
+  .cmd-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .cmd-btn.tech { border-color: rgba(255, 139, 61, 0.65); }
+  .cmd-btn.spell { border-color: rgba(87, 166, 255, 0.65); }
+  .cmd-btn.item { border-color: rgba(56, 224, 138, 0.65); }
+
+  #key-legend {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    padding: 4px 6px;
+    background: rgba(7, 10, 22, 0.98);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 9px;
+    color: var(--text-sub);
+  }
+
+  .key-cap {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 4px;
+    padding: 0 4px;
+    color: #fff;
+    font-weight: 700;
+  }
+
+  #modal-backdrop {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(4, 7, 16, 0.84);
+    z-index: 50;
+    padding: 12px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #modal-backdrop.open {
+    display: flex;
+  }
+
+  .modal-card {
+    width: 100%;
+    max-height: 90%;
+    background: #101733;
+    border: 1px solid var(--accent-cyan);
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+  }
+
+  .modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--accent-cyan);
+  }
+
+  .slot-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 8px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    font-size: 10.5px;
+  }
+
+  .slot-btns {
+    display: flex;
+    gap: 5px;
+  }
+
+  .squad-group {
+    padding: 6px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: 10px;
+  }
+
+  .member-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin: 2px;
+    padding: 3px 6px;
+    border-radius: 6px;
+    background: rgba(56, 232, 255, 0.14);
+    border: 1px solid rgba(56, 232, 255, 0.35);
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<div id="game-shell">
+  <div id="top-bar">
+    <div class="brand-title">ラブライブフロンティア</div>
+    <div id="region-badge" class="region-badge">内浦・海辺 / 浜辺エリア</div>
+    <div class="top-actions">
+      <button id="btn-squad" class="mini-btn" type="button">編成</button>
+      <button id="btn-save" class="mini-btn" type="button">セーブ</button>
+      <button id="btn-sound" class="mini-btn active" type="button">音ON</button>
+    </div>
+  </div>
+
+  <div id="stage-area">
+    <div id="fx-banner">閃き！</div>
+
+    <div id="cutscene-overlay" aria-live="polite">
+      <div class="cutscene-stage">
+        <img id="cutscene-left-img" src="" alt="" style="width:86px;height:118px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(56,232,255,0.4);" />
+        <img id="cutscene-right-img" src="" alt="" style="width:86px;height:118px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,210,76,0.45);" />
+      </div>
+      <div class="cutscene-card">
+        <div class="cutscene-top">
+          <img id="cutscene-speaker-img" src="" alt="" style="width:52px;height:72px;border-radius:8px;flex:0 0 auto;background:rgba(255,255,255,0.06);" />
+          <div style="flex:1 1 auto;min-width:0;">
+            <div id="cutscene-speaker" class="cutscene-name-tag">会話</div>
+            <div id="cutscene-line" class="cutscene-line"></div>
+          </div>
+        </div>
+        <button id="btn-cutscene-next" class="primary-btn" type="button">次へ</button>
+      </div>
+    </div>
+
+    <section id="title-screen" class="screen active">
+      <div class="hero-banner">
+        <div class="hero-sub">SAGA FRONTIER × LOVE LIVE! CROSSOVER</div>
+        <h1 class="hero-main">ラブライブフロンティア</h1>
+        <p class="hero-desc">
+          高海千歌ひとりから始まるリージョン＆エリア冒険。<br />
+          Aqours9人を集め、種族成長・閃き・連携でμ'sの頂点へ挑め！
+        </p>
+      </div>
+
+      <div id="story-box" class="story-box">
+        <img id="story-portrait" src="" alt="キャラクター" style="width:54px;height:74px;flex:0 0 auto;border-radius:8px;background:rgba(255,255,255,0.06);" />
+        <div>
+          <div id="story-speaker" class="story-speaker">プロローグ</div>
+          <div id="story-text"></div>
+        </div>
+      </div>
+
+      <div>
+        <button id="btn-story-next" class="primary-btn" type="button">物語を進める / 内浦へ出発</button>
+        <button id="btn-open-save-title" class="secondary-btn" type="button">セーブデータのロード / 削除</button>
+      </div>
+    </section>
+
+    <section id="field-screen" class="screen">
+      <div class="field-header">
+        <span id="field-progress">仲間: 1/9 | 中ボス: 0/3</span>
+        <span id="field-hint" style="color:var(--accent-gold);">タップまたは矢印で移動</span>
+      </div>
+
+      <div id="party-strip" class="party-strip"></div>
+
+      <div class="map-wrap">
+        <canvas id="field-canvas"></canvas>
+      </div>
+
+      <div id="field-log" class="field-log">
+        高海千歌「輝きたい！まずは内浦の浜辺を歩いて仲間やエリアを探そう！」
+      </div>
+
+      <div class="dpad-row" aria-label="方向パッド">
+        <div class="pad-spacer"></div>
+        <button class="pad-btn" data-dir="up" type="button">▲</button>
+        <div class="pad-spacer"></div>
+        <button class="pad-btn" data-dir="left" type="button">◀</button>
+        <button class="pad-btn" data-dir="down" type="button">▼</button>
+        <button class="pad-btn" data-dir="right" type="button">▶</button>
+      </div>
+    </section>
+
+    <section id="battle-screen" class="screen">
+      <div id="battle-vfx-layer"></div>
+
+      <div class="battle-top-info">
+        <span id="battle-type-label">通常バトル</span>
+        <span id="combo-badge" style="color:var(--accent-gold);font-weight:800;">連携: 0</span>
+        <span id="turn-actor-label" style="color:var(--accent-cyan);font-weight:800;">高海千歌の番</span>
+      </div>
+
+      <div id="enemy-stage" class="enemy-stage"></div>
+
+      <div id="allies-stage" class="allies-stage"></div>
+
+      <div class="battle-bottom">
+        <div id="tech-desc-box" class="tech-desc-box">
+          技をタップまたはホバーすると詳しい効果が表示されます。もう一度タップで発動！
+        </div>
+        <div id="battle-log" class="battle-log">μ'sのスクールアイドルが現れた！</div>
+        <div id="cmd-grid" class="cmd-grid"></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="key-legend">
+    <span><span class="key-cap">WASD/矢印</span> 移動</span>
+    <span><span class="key-cap">1-4</span> 技/行動</span>
+    <span><span class="key-cap">Q/E</span> ターゲット</span>
+    <span><span class="key-cap">S</span> セーブ</span>
+  </div>
+
+  <div id="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span id="modal-title">メニュー</span>
+        <button id="btn-modal-close" class="mini-btn" type="button">閉じる</button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  /* =========================================================
+     1. SOUND & BGM ENGINE
+  ========================================================= */
+  const Sound = (() => {
+    let ctx = null;
+    let enabled = true;
+    let bgmMode = 'none';
+    let bgmTimer = null;
+    let step = 0;
+
+    const patterns = {
+      field: {
+        tempo: 250,
+        lead: [523.25, 659.25, 783.99, 1046.5, 880.0, 783.99, 659.25, 587.33],
+        bass: [130.81, 0, 196.0, 0, 146.83, 0, 174.61, 0],
+        leadType: 'triangle',
+        bassType: 'sine',
+        leadVol: 0.032,
+        bassVol: 0.042
+      },
+      mob: {
+        tempo: 165,
+        lead: [440.0, 523.25, 659.25, 523.25, 587.33, 698.46, 783.99, 659.25],
+        bass: [110.0, 110.0, 146.83, 146.83, 164.81, 164.81, 130.81, 164.81],
+        leadType: 'sawtooth',
+        bassType: 'triangle',
+        leadVol: 0.022,
+        bassVol: 0.045
+      },
+      mid: {
+        tempo: 150,
+        lead: [392.0, 466.16, 587.33, 783.99, 698.46, 587.33, 466.16, 523.25],
+        bass: [98.0, 98.0, 116.54, 116.54, 130.81, 130.81, 146.83, 146.83],
+        leadType: 'square',
+        bassType: 'sawtooth',
+        leadVol: 0.020,
+        bassVol: 0.035
+      },
+      final: {
+        tempo: 135,
+        lead: [587.33, 783.99, 880.0, 1174.66, 1046.5, 987.77, 880.0, 1174.66],
+        bass: [146.83, 146.83, 196.0, 196.0, 220.0, 220.0, 174.61, 196.0],
+        leadType: 'sawtooth',
+        bassType: 'square',
+        leadVol: 0.026,
+        bassVol: 0.034
+      }
+    };
+
+    function ensureCtx() {
+      if (!enabled) return null;
+      if (!ctx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) ctx = new AC();
+      }
+      if (ctx && ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+      return ctx;
+    }
+
+    function tone(freq, dur = 0.12, type = 'triangle', gainVal = 0.06, delay = 0, endFreq = null) {
+      if (!freq || freq <= 0) return;
+      const c = ensureCtx();
+      if (!c || !enabled) return;
+      const now = c.currentTime + delay;
+      const osc = c.createOscillator();
+      const g = c.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, now);
+      if (endFreq && endFreq > 0) {
+        osc.frequency.exponentialRampToValueAtTime(endFreq, now + dur);
+      }
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gainVal), now + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+      osc.connect(g);
+      g.connect(c.destination);
+      osc.start(now);
+      osc.stop(now + dur + 0.025);
+    }
+
+    function setBGM(mode) {
+      bgmMode = mode;
+      if (bgmTimer) {
+        clearInterval(bgmTimer);
+        bgmTimer = null;
+      }
+      step = 0;
+      if (!enabled || mode === 'none') return;
+      const pat = patterns[mode] || patterns.field;
+      bgmTimer = setInterval(() => {
+        if (!enabled || bgmMode !== mode) return;
+        const idx = step % pat.lead.length;
+        const noteDur = (pat.tempo / 1000) * 0.85;
+        tone(pat.lead[idx], noteDur, pat.leadType, pat.leadVol, 0);
+        tone(pat.bass[idx], noteDur * 1.15, pat.bassType, pat.bassVol, 0);
+        if (mode === 'final' && step % 2 === 1) {
+          tone(1800, 0.04, 'square', 0.015, 0, 600);
+        }
+        step++;
+      }, pat.tempo);
+    }
+
+    function toggle() {
+      enabled = !enabled;
+      const btn = document.getElementById('btn-sound');
+      btn.textContent = enabled ? '音ON' : '音OFF';
+      btn.classList.toggle('active', enabled);
+      if (!enabled) {
+        if (bgmTimer) clearInterval(bgmTimer);
+        bgmTimer = null;
+      } else {
+        setBGM(bgmMode);
+      }
+    }
+
+    function sfxSkill(vfxType, techId) {
+      if (vfxType === 'slash') {
+        tone(1450, 0.11, 'sawtooth', 0.075, 0, 380);
+        tone(1980, 0.09, 'triangle', 0.055, 0.03, 720);
+        if (techId === 'ruby' || techId === 'shiny') {
+          tone(1600, 0.08, 'square', 0.045, 0.09, 900);
+        }
+      } else if (vfxType === 'slam') {
+        tone(190, 0.16, 'sawtooth', 0.085, 0, 58);
+        tone(95, 0.22, 'triangle', 0.08, 0.02, 42);
+      } else if (vfxType === 'magic') {
+        if (techId === 'piano') {
+          [783.99, 987.77, 1174.66, 1567.98].forEach((f, i) => tone(f, 0.16, 'sine', 0.065, i * 0.045));
+        } else if (techId === 'yohane') {
+          tone(620, 0.18, 'sawtooth', 0.065, 0, 185);
+          tone(440, 0.2, 'square', 0.05, 0.06, 140);
+        } else {
+          tone(130, 0.28, 'sawtooth', 0.085, 0, 48);
+          tone(220, 0.22, 'triangle', 0.06, 0.05, 70);
+        }
+      } else if (vfxType === 'heal') {
+        [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, 0.14, 'sine', 0.065, i * 0.05));
+      } else {
+        tone(220, 0.12, 'square', 0.065, 0, 85);
+      }
+    }
+
+    function sfxEnemyAttack() {
+      tone(280, 0.12, 'sawtooth', 0.07, 0, 120);
+      tone(150, 0.16, 'square', 0.06, 0.05, 65);
+    }
+
+    return {
+      toggle,
+      setBGM,
+      sfxSkill,
+      sfxEnemyAttack,
+      sfxStep: () => tone(310, 0.045, 'sine', 0.025),
+      sfxGlimmer: () => {
+        [659.25, 880, 1046.5, 1318.5].forEach((n, i) => tone(n, 0.16, 'triangle', 0.08, i * 0.065));
+      },
+      sfxCombo: (c) => {
+        const base = 523.25 + c * 65;
+        tone(base, 0.11, 'square', 0.055, 0);
+        tone(base * 1.25, 0.14, 'triangle', 0.065, 0.05);
+      },
+      sfxRecruit: () => {
+        [523.25, 659.25, 783.99, 1046.5].forEach((n, i) => tone(n, 0.14, 'triangle', 0.07, i * 0.07));
+      },
+      sfxKo: () => {
+        tone(220, 0.18, 'sawtooth', 0.07, 0);
+        tone(146.83, 0.25, 'sawtooth', 0.07, 0.12);
+      }
+    };
+  })();
+
+  /* =========================================================
+     2. CHARACTER DATA, SKILL VFX TYPES & DIALOGUES
+  ========================================================= */
+  const TECH_POOL = {
+    dash:   { id: 'dash',   name: 'みかん突撃', wp: 2, jp: 0, power: 1.25, kind: 'phys',  vfx: 'slam',  desc: '衝撃突進（威力1.25倍）。連携の起点になり、サンシャイン連撃へ派生する可能性あり。' },
+    spark:  { id: 'spark',  name: 'サンシャイン連撃', wp: 5, jp: 0, power: 1.75, kind: 'phys',  vfx: 'slash', desc: '光あふれる連続突撃（威力1.75倍）。高揚した気迫で敵単体にまとまった打撃を与える。' },
+    wave:   { id: 'wave',   name: 'ヨーソロー斬り', wp: 4, jp: 0, power: 1.55, kind: 'phys',  vfx: 'slash', desc: '海風のように鋭い一閃（威力1.55倍）。全速前進・大海原へ派生する可能性あり。' },
+    tide:   { id: 'tide',   name: '全速前進・大海原', wp: 8, jp: 0, power: 2.25, kind: 'phys',  vfx: 'slam',  desc: '荒波を割る強力な突貫技（威力2.25倍）。WP消費が大きいぶん高いダメージを狙える。' },
+    ruby:   { id: 'ruby',   name: 'がんばルビィ乱舞', wp: 5, jp: 0, power: 1.80, kind: 'phys',  vfx: 'slash', desc: '全力の気合を込めた連続斬撃（威力1.80倍）。シャイニー・ブレイクへ派生する可能性あり。' },
+    shiny:  { id: 'shiny',  name: 'シャイニー・ブレイク', wp: 9, jp: 0, power: 2.45, kind: 'phys',  vfx: 'slash', desc: '眩い輝きを放つ高威力フィニッシュ技（威力2.45倍）。連携に乗せると大ダメージ。' },
+    hug:    { id: 'hug',    name: 'ダイビング・タックル', wp: 6, jp: 0, power: 1.90, kind: 'phys',  vfx: 'slam',  desc: '力強い踏み込みから放つ重撃（威力1.90倍）。シャイニー・ブレイクへ派生する可能性あり。' },
+    dia:    { id: 'dia',    name: '凛然・一刀両断', wp: 7, jp: 0, power: 2.05, kind: 'phys',  vfx: 'slash', desc: '気品と鋭さを併せ持つ剣技（威力2.05倍）。硬い相手にも安定したダメージを与える。' },
+    yohane: { id: 'yohane', name: 'リトルデーモン降臨', wp: 0, jp: 6, power: 1.95, kind: 'spell', vfx: 'magic', desc: '魔力依存の闇術（威力1.95倍）。JPを6消費し、丸子・天地鳴動ずらへ派生する可能性あり。' },
+    piano:  { id: 'piano',  name: '旋律の浄化光', wp: 0, jp: 5, power: 1.75, kind: 'spell', vfx: 'magic', desc: '魔力依存の光術（威力1.75倍）。JPを5消費し、リトルデーモン降臨へ派生する可能性あり。' },
+    zura:   { id: 'zura',   name: '丸子・天地鳴動ずら', wp: 0, jp: 7, power: 2.15, kind: 'spell', vfx: 'magic', desc: '魔力依存の大地術（威力2.15倍）。JPを7消費して深い響きで敵を打ち据える。' }
+  };
+
+  const GLIMMER_MAP = {
+    dash: 'spark',
+    wave: 'tide',
+    ruby: 'shiny',
+    hug: 'shiny',
+    yohane: 'zura',
+    piano: 'yohane'
+  };
+
+  const AQOURS_DEFS = [
+    {
+      id: 'chika', name: '高海千歌', grade: '2年', race: '人間',
+      hair: '#ff7a22', eye: '#2448b8', hairStyle: 'short_orange',
+      firstPerson: '私', catchphrase: '輝きたい！',
+      maxHp: 135, maxWp: 28, maxJp: 12, lp: 7, atk: 24, mag: 14, def: 15, spd: 21,
+      techs: ['dash', 'wave'],
+      recruitDialogue: []
+    },
+    {
+      id: 'you', name: '渡辺曜', grade: '2年', race: '人間',
+      hair: '#b87842', eye: '#d49428', hairStyle: 'short_you',
+      firstPerson: '私', catchphrase: 'ヨーソロー！',
+      maxHp: 132, maxWp: 26, maxJp: 10, lp: 7, atk: 23, mag: 13, def: 16, spd: 23,
+      techs: ['wave', 'dash'],
+      recruitDialogue: [
+        { speaker: '高海千歌', charId: 'chika', expr: 'shout', text: '曜ちゃん！海辺で何してたの？私たちの冒険、一緒にやってみようよ！' },
+        { speaker: '渡辺曜', charId: 'you', expr: 'smile', text: '千歌ちゃん！もちろん、ヨーソロー！海の向こうのフロンティアまで全速前進だね！' }
+      ]
+    },
+    {
+      id: 'riko', name: '桜内梨子', grade: '2年', race: '人間',
+      hair: '#8a3b34', eye: '#5d46b8', hairStyle: 'long_riko',
+      firstPerson: '私', catchphrase: 'ちょっと待って！',
+      maxHp: 118, maxWp: 14, maxJp: 30, lp: 6, atk: 15, mag: 26, def: 14, spd: 18,
+      techs: ['piano', 'dash'],
+      recruitDialogue: [
+        { speaker: '桜内梨子', charId: 'riko', expr: 'smile', text: 'ちょっと待って！ここ内浦の風って、なんだか不思議な旋律が聴こえる…' },
+        { speaker: '高海千歌', charId: 'chika', expr: 'smile', text: '梨子ちゃんのピアノと術の力があれば、きっともっと強く輝けるよ！' }
+      ]
+    },
+    {
+      id: 'yoshiko', name: '津島善子', grade: '1年', race: '妖魔',
+      hair: '#1e2648', eye: '#e5b828', hairStyle: 'twin_yoshiko',
+      firstPerson: 'ヨハネ', catchphrase: '堕天使ヨハネです！',
+      maxHp: 124, maxWp: 14, maxJp: 34, lp: 6, atk: 16, mag: 28, def: 13, spd: 20,
+      techs: ['yohane', 'piano'],
+      recruitDialogue: [
+        { speaker: '津島善子', charId: 'yoshiko', expr: 'shout', text: 'フフフ…沼津の街に呼ばれし堕天使ヨハネです！…って、千歌ちゃんたちなの！？' },
+        { speaker: '高海千歌', charId: 'chika', expr: 'smile', text: '善子ちゃん、妖魔の魔術の力、μ\'sとの戦いでも貸してほしいな！' }
+      ]
+    },
+    {
+      id: 'hanamaru', name: '国木田花丸', grade: '1年', race: 'モンスター',
+      hair: '#6e472b', eye: '#d9a426', hairStyle: 'bob_hanamaru',
+      firstPerson: 'おいら', catchphrase: '〜ずら',
+      maxHp: 148, maxWp: 18, maxJp: 24, lp: 8, atk: 21, mag: 22, def: 19, spd: 15,
+      techs: ['zura', 'dash'],
+      recruitDialogue: [
+        { speaker: '国木田花丸', charId: 'hanamaru', expr: 'smile', text: 'おいら本がいっぱい読めて嬉しいずら〜！千歌ちゃん、ずら丸もついていくずら！' },
+        { speaker: '渡辺曜', charId: 'you', expr: 'smile', text: '花丸ちゃんのタフさと大地を揺らす術、心強いね！' }
+      ]
+    },
+    {
+      id: 'ruby', name: '黒澤ルビィ', grade: '1年', race: '人間',
+      hair: '#ff598c', eye: '#d9386b', hairStyle: 'twin_ruby',
+      firstPerson: 'ルビィ', catchphrase: 'がんばルビィ！',
+      maxHp: 112, maxWp: 24, maxJp: 18, lp: 6, atk: 18, mag: 19, def: 13, spd: 24,
+      techs: ['ruby', 'dash'],
+      recruitDialogue: [
+        { speaker: '黒澤ルビィ', charId: 'ruby', expr: 'shout', text: 'ルビィ、ちょっと怖いけど…みんなとなら、がんばルビィ！' },
+        { speaker: '高海千歌', charId: 'chika', expr: 'shout', text: 'うん、一緒に行こうルビィちゃん！みんなで大きな輪を作ろう！' }
+      ]
+    },
+    {
+      id: 'kanan', name: '松浦果南', grade: '3年', race: 'モンスター',
+      hair: '#117a78', eye: '#18a89e', hairStyle: 'side_kanan',
+      firstPerson: '私', catchphrase: 'ハグしよ！',
+      maxHp: 156, maxWp: 32, maxJp: 10, lp: 8, atk: 27, mag: 14, def: 20, spd: 20,
+      techs: ['hug', 'wave'],
+      recruitDialogue: [
+        { speaker: '松浦果南', charId: 'kanan', expr: 'smile', text: 'ここまで来たんだね、千歌！さあ、気合い入れていくよ〜！…ほら、ハグしよ！' },
+        { speaker: '高海千歌', charId: 'chika', expr: 'shout', text: '果南ちゃん！3年生が揃ったら、もうどこへだって行ける気がするよ！' }
+      ]
+    },
+    {
+      id: 'dia', name: '黒澤ダイヤ', grade: '3年', race: '人間',
+      hair: '#131522', eye: '#68748c', hairStyle: 'long_dia',
+      firstPerson: 'わたくし', catchphrase: 'ですわ！',
+      maxHp: 128, maxWp: 26, maxJp: 20, lp: 7, atk: 24, mag: 21, def: 17, spd: 19,
+      techs: ['dia', 'piano'],
+      recruitDialogue: [
+        { speaker: '黒澤ダイヤ', charId: 'dia', expr: 'shout', text: 'スクールアイドルの誇りにかけて、一歩も引くわけにはいきませんわ！' },
+        { speaker: '桜内梨子', charId: 'riko', expr: 'smile', text: 'ダイヤさんがいてくれると、隊列全体がピシッと引き締まりますね！' }
+      ]
+    },
+    {
+      id: 'mari', name: '小原鞠莉', grade: '3年', race: 'メカ',
+      hair: '#f7ca3e', eye: '#26b87a', hairStyle: 'wave_mari',
+      firstPerson: '私', catchphrase: 'シャイニー！',
+      maxHp: 150, maxWp: 30, maxJp: 22, lp: 7, atk: 26, mag: 23, def: 21, spd: 21,
+      techs: ['shiny', 'wave'],
+      recruitDialogue: [
+        { speaker: '小原鞠莉', charId: 'mari', expr: 'shout', text: 'It\'s SHINY time!! 限界突破して、最高のステージを作りましょう！' },
+        { speaker: '高海千歌', charId: 'chika', expr: 'shout', text: '鞠莉ちゃんも加わって、ついにAqours9人がひとつになったね！！' }
+      ]
+    }
+  ];
+
+  const MUSE_DEFS = [
+    { id: 'honoka', name: '高坂穂乃果', hair: '#e87828', eye: '#3b82f6', hairStyle: 'side_honoka', line: 'ファイトだよっ！' },
+    { id: 'kotori', name: '南ことり',   hair: '#cfd4dc', eye: '#b89628', hairStyle: 'bob_kotori',  line: 'ちゅんちゅん♪' },
+    { id: 'umi',    name: '園田海未',   hair: '#222b5c', eye: '#3858b8', hairStyle: 'long_umi',    line: 'ラブアローシュート！' },
+    { id: 'rin',    name: '星空凛',     hair: '#e89b25', eye: '#2ca878', hairStyle: 'short_rin',   line: 'にゃーっ！' },
+    { id: 'maki',   name: '西木野真姫', hair: '#c9384a', eye: '#7c48b8', hairStyle: 'long_maki',   line: '別に…アンタのためじゃないんだからね！' },
+    { id: 'hanayo', name: '小泉花陽',   hair: '#4c7c44', eye: '#6b449c', hairStyle: 'bob_hanayo',  line: 'だ、だれか助けて〜！' },
+    { id: 'eli',    name: '絢瀬絵里',   hair: '#e8d068', eye: '#3888b8', hairStyle: 'pony_eli',    line: 'ハラショー！' },
+    { id: 'nozomi', name: '東條希',     hair: '#7852a8', eye: '#48a868', hairStyle: 'long_nozomi', line: 'スピリチュアルやねぇ〜♪' },
+    { id: 'nico',   name: '矢澤にこ',   hair: '#1b1d2b', eye: '#b82848', hairStyle: 'twin_nico',   line: 'にっこにっこにー♪' }
+  ];
+
+  const BOSS_DIALOGUES = {
+    mid1: [
+      { speaker: '高坂穂乃果', charId: 'honoka', expr: 'shout', text: 'ここから先はPrintemps先鋒隊が通さないよ！ファイトだよっ！' },
+      { speaker: '高海千歌', charId: 'chika', expr: 'shout', text: '穂乃果ちゃんたちだ…！憧れだけじゃなく、今の私たちの力をぶつけるよ！' }
+    ],
+    mid2: [
+      { speaker: '園田海未', charId: 'umi', expr: 'shout', text: '私たちの覚悟と連携、見せていただきましょう！ラブアローシュート！' },
+      { speaker: '渡辺曜', charId: 'you', expr: 'shout', text: '海未ちゃんの気迫がすごい！連携を繋いで突破しよう！' }
+    ],
+    mid3: [
+      { speaker: '絢瀬絵里', charId: 'eli', expr: 'shout', text: '頂上の門番はBiBiが務めるわ。甘い気持ちでは通さないわよ！' },
+      { speaker: '黒澤ダイヤ', charId: 'dia', expr: 'shout', text: '望むところですわ！Aqoursの誇りを懸けて参ります！' }
+    ],
+    final: [
+      { speaker: '高坂穂乃果', charId: 'honoka', expr: 'shout', text: 'μ\'s9人全員、ここに揃ったよ！みんなで最高のライブバトルを始めよう！' },
+      { speaker: '高海千歌', charId: 'chika', expr: 'shout', text: 'Aqours9人の輝き、μ\'sに届け！！全力で行くよ、みんな！！' }
+    ]
+  };
+
+  /* =========================================================
+     3. REGIONS & CONNECTED SUB-AREAS + PATROLLING SYMBOLS
+  ========================================================= */
+  const AREAS = {
+    uchiura_beach: {
+      id: 'uchiura_beach',
+      regionName: '内浦・海辺リージョン',
+      areaName: '浜辺エリア',
+      theme: 'beach',
+      bgm: 'field',
+      groundCol: '#183752',
+      wallCol: '#24664f',
+      waterCol: '#1775ad',
+      recruits: [{ x: 6, y: 3, charId: 'you' }],
+      heals: [{ x: 8, y: 8 }],
+      portals: [
+        { x: 9, y: 5, toArea: 'uchiura_hill', toX: 1, toY: 5, label: 'みかん坂へ' }
+      ],
+      symbols: [
+        { id: 's_u1', x: 5, y: 6, dx: 1, dy: 0, enemyId: 'honoka' }
+      ],
+      map: [
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,2,2,0,0,0,0,0,1],
+        [1,0,2,2,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0],
+        [1,0,0,0,0,0,2,2,0,1],
+        [1,0,0,0,0,0,2,2,0,1],
+        [1,0,0,0,0,0,0,0,5,1],
+        [1,1,1,1,1,1,1,1,1,1]
+      ],
+      start: { x: 2, y: 5 }
+    },
+    uchiura_hill: {
+      id: 'uchiura_hill',
+      regionName: '内浦・海辺リージョン',
+      areaName: 'みかん坂エリア',
+      theme: 'hill',
+      bgm: 'field',
+      groundCol: '#204245',
+      wallCol: '#347a54',
+      waterCol: '#1b6796',
+      recruits: [{ x: 3, y: 7, charId: 'riko' }],
+      heals: [],
+      portals: [
+        { x: 0, y: 5, toArea: 'uchiura_beach', toX: 8, toY: 5, label: '浜辺へ戻る' },
+        { x: 9, y: 3, toArea: 'numazu_arcade', toX: 1, toY: 5, label: '沼津リージョンへ' }
+      ],
+      midBoss: { id: 'mid1', x: 6, y: 4, name: 'Printemps先鋒隊', members: ['honoka', 'kotori', 'hanayo'], hp: 140, atk: 20, def: 11 },
+      symbols: [
+        { id: 's_u2', x: 4, y: 2, dx: 0, dy: 1, enemyId: 'kotori' }
+      ],
+      map: [
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,1,1,0,0,0,0,1],
+        [1,0,0,1,0,0,0,0,0,0],
+        [1,0,0,0,0,0,0,0,0,1],
+        [0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1]
+      ],
+      start: { x: 1, y: 5 }
+    },
+    numazu_arcade: {
+      id: 'numazu_arcade',
+      regionName: '沼津・商店街リージョン',
+      areaName: '仲見世エリア',
+      theme: 'arcade',
+      bgm: 'field',
+      groundCol: '#293254',
+      wallCol: '#56447a',
+      waterCol: '#1b5f94',
+      recruits: [
+        { x: 7, y: 2, charId: 'yoshiko' },
+        { x: 2, y: 7, charId: 'hanamaru' }
+      ],
+      heals: [{ x: 5, y: 8 }],
+      portals: [
+        { x: 0, y: 5, toArea: 'uchiura_hill', toX: 8, toY: 3, label: '内浦リージョンへ' },
+        { x: 9, y: 4, toArea: 'numazu_shrine', toX: 1, toY: 5, label: '港の灯台エリアへ' }
+      ],
+      symbols: [
+        { id: 's_n1', x: 5, y: 3, dx: -1, dy: 0, enemyId: 'hanayo' }
+      ],
+      map: [
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,1,1,0,0,0,0,1],
+        [1,0,0,1,0,0,0,0,0,1],
+        [1,0,0,0,0,0,1,1,0,0],
+        [0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,5,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1]
+      ],
+      start: { x: 1, y: 5 }
+    },
+    numazu_shrine: {
+      id: 'numazu_shrine',
+      regionName: '沼津・商店街リージョン',
+      areaName: '港の灯台エリア',
+      theme: 'lighthouse',
+      bgm: 'field',
+      groundCol: '#2e395e',
+      wallCol: '#604d87',
+      waterCol: '#1a68a6',
+      recruits: [{ x: 7, y: 7, charId: 'ruby' }],
+      heals: [],
+      portals: [
+        { x: 0, y: 5, toArea: 'numazu_arcade', toX: 8, toY: 4, label: '仲見世へ戻る' },
+        { x: 9, y: 2, toArea: 'akiba_stairs', toX: 1, toY: 5, label: '神田リージョンへ' }
+      ],
+      midBoss: { id: 'mid2', x: 5, y: 4, name: 'Lily White強襲隊', members: ['umi', 'rin', 'nozomi'], hp: 185, atk: 25, def: 14 },
+      symbols: [
+        { id: 's_n2', x: 4, y: 6, dx: 1, dy: 0, enemyId: 'umi' }
+      ],
+      map: [
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0],
+        [1,0,1,1,0,0,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1]
+      ],
+      start: { x: 1, y: 5 }
+    },
+    akiba_stairs: {
+      id: 'akiba_stairs',
+      regionName: '神田・天空階段リージョン',
+      areaName: '石段エリア',
+      theme: 'stairs',
+      bgm: 'field',
+      groundCol: '#322754',
+      wallCol: '#69408a',
+      waterCol: '#42307d',
+      recruits: [
+        { x: 6, y: 2, charId: 'kanan' },
+        { x: 3, y: 6, charId: 'dia' }
+      ],
+      heals: [{ x: 4, y: 8 }],
+      portals: [
+        { x: 0, y: 5, toArea: 'numazu_shrine', toX: 8, toY: 2, label: '沼津リージョンへ' },
+        { x: 9, y: 3, toArea: 'akiba_summit', toX: 1, toY: 5, label: '望楼エリアへ' }
+      ],
+      symbols: [
+        { id: 's_a1', x: 5, y: 5, dx: 0, dy: -1, enemyId: 'nozomi' }
+      ],
+      map: [
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,1,1,1,0,0,0,0],
+        [1,0,0,0,0,0,0,0,0,1],
+        [0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,5,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1]
+      ],
+      start: { x: 1, y: 5 }
+    },
+    akiba_summit: {
+      id: 'akiba_summit',
+      regionName: '神田・天空階段リージョン',
+      areaName: '望楼エリア',
+      theme: 'summit',
+      bgm: 'field',
+      groundCol: '#3a2961',
+      wallCol: '#78469e',
+      waterCol: '#4e3591',
+      recruits: [{ x: 7, y: 6, charId: 'mari' }],
+      heals: [],
+      portals: [
+        { x: 0, y: 5, toArea: 'akiba_stairs', toX: 8, toY: 3, label: '石段へ戻る' },
+        { x: 9, y: 2, toArea: 'final_dome', toX: 1, toY: 5, label: '最終決戦リージョンへ' }
+      ],
+      midBoss: { id: 'mid3', x: 5, y: 4, name: 'BiBi頂上決戦隊', members: ['eli', 'maki', 'nico'], hp: 230, atk: 30, def: 17 },
+      symbols: [
+        { id: 's_a2', x: 4, y: 2, dx: 1, dy: 0, enemyId: 'maki' }
+      ],
+      map: [
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0],
+        [1,0,0,0,1,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1]
+      ],
+      start: { x: 1, y: 5 }
+    },
+    final_dome: {
+      id: 'final_dome',
+      regionName: 'フロンティア・最終リージョン',
+      areaName: 'μ\'s決戦ステージ',
+      theme: 'dome',
+      bgm: 'field',
+      groundCol: '#341947',
+      wallCol: '#7d2d7d',
+      waterCol: '#b02c7e',
+      recruits: [],
+      heals: [{ x: 2, y: 7 }, { x: 7, y: 7 }],
+      portals: [
+        { x: 0, y: 5, toArea: 'akiba_summit', toX: 8, toY: 2, label: '神田リージョンへ戻る' }
+      ],
+      finalBossTrigger: { x: 5, y: 2 },
+      symbols: [
+        { id: 's_f1', x: 4, y: 5, dx: 1, dy: 0, enemyId: 'nico' }
+      ],
+      map: [
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,1,0,0,1,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,5,0,0,0,0,5,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1]
+      ],
+      start: { x: 1, y: 5 }
+    }
+  };
+
+  /* =========================================================
+     4. CHARACTER PORTRAIT & CUTE FIELD SPRITE RENDERER
+  ========================================================= */
+  const PortraitCache = {};
+
+  function findAnyCharDef(charId) {
+    return AQOURS_DEFS.find(a => a.id === charId) || MUSE_DEFS.find(m => m.id === charId) || AQOURS_DEFS[0];
+  }
+
+  function getPortraitSVG(charDef, expr = 'smile', sizeW = 64, sizeH = 88) {
+    const key = `${charDef.id}_${expr}_${sizeW}_${sizeH}`;
+    if (PortraitCache[key]) return PortraitCache[key];
+
+    const hair = charDef.hair;
+    const eye = charDef.eye;
+    const isHit = expr === 'hit';
+    const isShout = expr === 'shout';
+
+    let backHair = '';
+    if (charDef.hairStyle.includes('long')) {
+      backHair = `<rect x="15" y="24" width="34" height="52" rx="14" fill="${hair}" />`;
+    } else if (charDef.hairStyle.includes('twin')) {
+      backHair = `
+        <ellipse cx="12" cy="34" rx="8" ry="22" fill="${hair}" />
+        <ellipse cx="52" cy="34" rx="8" ry="22" fill="${hair}" />
+      `;
+    } else if (charDef.hairStyle.includes('pony')) {
+      backHair = `<path d="M44 22 Q60 28 56 54 Q46 44 42 32 Z" fill="${hair}" />`;
+    } else if (charDef.hairStyle.includes('side')) {
+      backHair = `<path d="M42 22 Q58 34 52 60 Q42 50 40 30 Z" fill="${hair}" />`;
+    } else {
+      backHair = `<path d="M16 24 Q32 10 48 24 L48 44 L16 44 Z" fill="${hair}" />`;
+    }
+
+    const leftEye = `<ellipse cx="25" cy="36" rx="4.2" ry="5" fill="#fff"/><circle cx="25.5" cy="36.5" r="2.8" fill="${eye}"/><circle cx="24" cy="34.8" r="1.1" fill="#fff"/>`;
+    const rightEye = `<ellipse cx="39" cy="36" rx="4.2" ry="5" fill="#fff"/><circle cx="38.5" cy="36.5" r="2.8" fill="${eye}"/><circle cx="37.2" cy="34.8" r="1.1" fill="#fff"/>`;
+
+    const mouth = isHit
+      ? `<path d="M27 48 Q32 43 37 48" stroke="#8a2438" stroke-width="2" fill="none"/>`
+      : isShout
+      ? `<ellipse cx="32" cy="47.5" rx="4.5" ry="3.8" fill="#c93b55"/>`
+      : `<path d="M27.5 46.5 Q32 50.5 36.5 46.5" stroke="#9e2a42" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+
+    const mole = charDef.id === 'dia' ? `<circle cx="21" cy="42" r="1.1" fill="#222"/>` : '';
+    const blush = `<ellipse cx="20" cy="42" rx="3.2" ry="1.6" fill="#ff7aa2" opacity="0.45"/><ellipse cx="44" cy="42" rx="3.2" ry="1.6" fill="#ff7aa2" opacity="0.45"/>`;
+    const bangs = charDef.hairStyle.includes('yoshiko')
+      ? `<path d="M16 26 L24 38 L30 25 L48 26 Q42 15 32 15 Q20 15 16 26 Z" fill="${hair}"/>`
+      : `<path d="M16 26 Q32 14 48 26 L46 31 Q36 24 28 30 Q22 24 16 31 Z" fill="${hair}"/>`;
+
+    const isAqours = AQOURS_DEFS.some(a => a.id === charDef.id);
+    const outfitCol = isAqours ? '#1f4e8c' : '#7a2558';
+    const trimCol = isAqours ? '#38e8ff' : '#ffd24c';
+
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 88" width="${sizeW}" height="${sizeH}">
+      ${backHair}
+      <path d="M14 86 L18 56 Q32 52 46 56 L50 86 Z" fill="${outfitCol}"/>
+      <path d="M24 56 L32 68 L40 56" fill="none" stroke="${trimCol}" stroke-width="2.5"/>
+      <rect x="27" y="48" width="10" height="10" rx="3" fill="#ffe0c6"/>
+      <ellipse cx="32" cy="36" rx="14.5" ry="15.5" fill="#ffe5ce"/>
+      ${blush}
+      ${mole}
+      ${leftEye}
+      ${rightEye}
+      ${mouth}
+      ${bangs}
+    </svg>`;
+
+    const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    PortraitCache[key] = url;
+    return url;
+  }
+
+  function drawCuteFieldChar(ctx, charDef, cx, cy, size, opts = {}) {
+    const { isEnemy = false, bob = 0, facing = 'down' } = opts;
+    const s = size;
+    const y = cy + bob;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.38)';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + s * 0.42, s * 0.28, s * 0.1, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = charDef.hair;
+    if (charDef.hairStyle.includes('twin')) {
+      ctx.beginPath();
+      ctx.ellipse(cx - s * 0.28, y - s * 0.08, s * 0.12, s * 0.26, 0.15, 0, Math.PI * 2);
+      ctx.ellipse(cx + s * 0.28, y - s * 0.08, s * 0.12, s * 0.26, -0.15, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (charDef.hairStyle.includes('long')) {
+      ctx.beginPath();
+      ctx.roundRect(cx - s * 0.24, y - s * 0.22, s * 0.48, s * 0.56, 6);
+      ctx.fill();
+    } else if (charDef.hairStyle.includes('pony') || charDef.hairStyle.includes('side')) {
+      ctx.beginPath();
+      ctx.ellipse(cx + s * 0.24, y - s * 0.1, s * 0.13, s * 0.24, -0.25, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.fillStyle = isEnemy ? '#99286c' : '#235ea8';
+    ctx.beginPath();
+    ctx.moveTo(cx - s * 0.18, y + s * 0.08);
+    ctx.lineTo(cx + s * 0.18, y + s * 0.08);
+    ctx.lineTo(cx + s * 0.25, y + s * 0.36);
+    ctx.lineTo(cx - s * 0.25, y + s * 0.36);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = isEnemy ? '#ffd24c' : '#38e8ff';
+    ctx.fillRect(cx - s * 0.06, y + s * 0.09, s * 0.12, s * 0.06);
+
+    ctx.fillStyle = '#ffe5ce';
+    ctx.beginPath();
+    ctx.arc(cx, y - s * 0.12, s * 0.23, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (facing === 'up') {
+      ctx.fillStyle = charDef.hair;
+      ctx.beginPath();
+      ctx.arc(cx, y - s * 0.13, s * 0.235, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      const lookShiftX = facing === 'left' ? -s * 0.035 : facing === 'right' ? s * 0.035 : 0;
+
+      ctx.fillStyle = 'rgba(255, 110, 155, 0.5)';
+      ctx.beginPath();
+      ctx.arc(cx - s * 0.13 + lookShiftX, y - s * 0.06, s * 0.04, 0, Math.PI * 2);
+      ctx.arc(cx + s * 0.13 + lookShiftX, y - s * 0.06, s * 0.04, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = charDef.eye;
+      ctx.beginPath();
+      ctx.arc(cx - s * 0.08 + lookShiftX, y - s * 0.12, s * 0.045, 0, Math.PI * 2);
+      ctx.arc(cx + s * 0.08 + lookShiftX, y - s * 0.12, s * 0.045, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(cx - s * 0.09 + lookShiftX, y - s * 0.14, s * 0.018, 0, Math.PI * 2);
+      ctx.arc(cx + s * 0.07 + lookShiftX, y - s * 0.14, s * 0.018, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#9e2a42';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(cx + lookShiftX, y - s * 0.05, s * 0.045, 0.15 * Math.PI, 0.85 * Math.PI);
+      ctx.stroke();
+
+      ctx.fillStyle = charDef.hair;
+      ctx.beginPath();
+      ctx.arc(cx, y - s * 0.15, s * 0.24, Math.PI, 2 * Math.PI);
+      ctx.fill();
+      ctx.fillRect(cx - s * 0.23, y - s * 0.20, s * 0.46, s * 0.075);
+    }
+  }
+
+  /* =========================================================
+     5. GAME STATE & SAVE / LOAD / DELETE
+  ========================================================= */
+  const SAVE_KEY = 'lovelive_frontier_saves_v4';
+
+  function createMemberInstance(def) {
+    return {
+      id: def.id,
+      name: def.name,
+      grade: def.grade,
+      race: def.race,
+      hair: def.hair,
+      eye: def.eye,
+      hairStyle: def.hairStyle,
+      firstPerson: def.firstPerson,
+      catchphrase: def.catchphrase,
+      hp: def.maxHp,
+      maxHp: def.maxHp,
+      wp: def.maxWp,
+      maxWp: def.maxWp,
+      jp: def.maxJp,
+      maxJp: def.maxJp,
+      lp: def.lp,
+      maxLp: def.lp,
+      atk: def.atk,
+      mag: def.mag,
+      def: def.def,
+      spd: def.spd,
+      techs: [...def.techs]
+    };
+  }
+
+  const state = {
+    screen: 'title',
+    storyIdx: 0,
+    areaId: 'uchiura_beach',
+    player: { x: 2, y: 5, facing: 'down', stepTick: 0 },
+    busyTurn: false,
+    cutscene: null,
+    recruitedIds: ['chika'],
+    members: { chika: createMemberInstance(AQOURS_DEFS[0]) },
+    squads: [
+      ['chika', null, null],
+      [null, null, null],
+      [null, null, null]
+    ],
+    activeSquad: 0,
+    defeatedMidBosses: [],
+    defeatedSymbols: [],
+    finalBossCleared: false,
+    potions: 3,
+    battle: null
+  };
+
+  const STORY_LINES = [
+    {
+      charId: 'chika',
+      speaker: '内浦・海辺',
+      text: '高海千歌「私たち、まだ何者でもない普通の子。でも、リージョンの各エリアを歩いて技を磨けば、きっと輝けるはず！」'
+    },
+    {
+      charId: 'riko',
+      speaker: 'フロンティアの掟',
+      text: 'WP・JP・LPを管理し、戦闘中の「閃き」で新技を会得、「連携」でダメージを連鎖させよう。仲間は最大9人（3人×3隊列）まで集結する。'
+    },
+    {
+      charId: 'you',
+      speaker: 'μ\'sの挑戦状',
+      text: '各リージョンに待つμ\'sの精鋭3人組を突破し、最終リージョンでμ\'s9人全員との総力戦を勝ち抜け！'
+    }
+  ];
+
+  function getActiveSquadMembers() {
+    const sq = state.squads[state.activeSquad] || [];
+    const list = sq.map(id => (id && state.members[id] ? state.members[id] : null)).filter(Boolean);
+    if (list.length === 0) {
+      const firstId = state.recruitedIds[0];
+      return firstId && state.members[firstId] ? [state.members[firstId]] : [];
+    }
+    return list;
+  }
+
+  function getAllRecruitedMembers() {
+    return state.recruitedIds.map(id => state.members[id]).filter(Boolean);
+  }
+
+  function addRecruitToRoster(charId) {
+    if (state.recruitedIds.includes(charId)) return false;
+    const def = AQOURS_DEFS.find(d => d.id === charId);
+    if (!def) return false;
+    state.recruitedIds.push(charId);
+    state.members[charId] = createMemberInstance(def);
+
+    for (let s = 0; s < 3; s++) {
+      for (let slot = 0; slot < 3; slot++) {
+        if (!state.squads[s][slot]) {
+          state.squads[s][slot] = charId;
+          return true;
+        }
+      }
+    }
+    return true;
+  }
+
+  /* =========================================================
+     6. CUTSCENE SYSTEM
+  ========================================================= */
+  function startCutscene(lines, leftId, rightId, onComplete) {
+    if (!lines || lines.length === 0) {
+      if (onComplete) onComplete();
+      return;
+    }
+    state.cutscene = {
+      lines,
+      idx: 0,
+      leftId: leftId || 'chika',
+      rightId: rightId || 'honoka',
+      onComplete
+    };
+    document.getElementById('cutscene-overlay').classList.add('open');
+    renderCutsceneStep();
+  }
+
+  function renderCutsceneStep() {
+    const cs = state.cutscene;
+    if (!cs) return;
+    const stepData = cs.lines[cs.idx];
+    const leftDef = findAnyCharDef(cs.leftId);
+    const rightDef = findAnyCharDef(cs.rightId);
+    const speakerDef = findAnyCharDef(stepData.charId);
+
+    document.getElementById('cutscene-left-img').src = getPortraitSVG(leftDef, 'smile', 86, 118);
+    document.getElementById('cutscene-right-img').src = getPortraitSVG(rightDef, 'shout', 86, 118);
+    document.getElementById('cutscene-speaker-img').src = getPortraitSVG(speakerDef, stepData.expr || 'smile', 52, 72);
+    document.getElementById('cutscene-speaker').textContent = stepData.speaker;
+    document.getElementById('cutscene-line').textContent = stepData.text;
+    document.getElementById('btn-cutscene-next').textContent =
+      cs.idx < cs.lines.length - 1 ? '次のセリフへ' : '決定・進む';
+  }
+
+  function advanceCutscene() {
+    const cs = state.cutscene;
+    if (!cs) return;
+    if (cs.idx < cs.lines.length - 1) {
+      cs.idx++;
+      renderCutsceneStep();
+    } else {
+      const cb = cs.onComplete;
+      state.cutscene = null;
+      document.getElementById('cutscene-overlay').classList.remove('open');
+      if (cb) cb();
+    }
+  }
+
+  /* =========================================================
+     7. SCREEN & UI RENDERING + HiDPI CANVAS SYNC
+  ========================================================= */
+  function showScreen(name) {
+    state.screen = name;
+    document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+    document.getElementById(`${name}-screen`).classList.add('active');
+    const area = AREAS[state.areaId] || AREAS.uchiura_beach;
+    if (name === 'field') {
+      Sound.setBGM(area.bgm);
+      renderFieldUI();
+    } else if (name === 'title') {
+      Sound.setBGM('none');
+      renderStory();
+    }
+  }
+
+  function renderStory() {
+    const item = STORY_LINES[state.storyIdx % STORY_LINES.length];
+    const def = AQOURS_DEFS.find(d => d.id === item.charId) || AQOURS_DEFS[0];
+    document.getElementById('story-portrait').src = getPortraitSVG(def, 'smile', 54, 74);
+    document.getElementById('story-speaker').textContent = item.speaker;
+    document.getElementById('story-text').textContent = item.text;
+  }
+
+  function setFieldLog(msg) {
+    document.getElementById('field-log').textContent = msg;
+  }
+
+  function renderFieldUI() {
+    const area = AREAS[state.areaId] || AREAS.uchiura_beach;
+    document.getElementById('region-badge').textContent = `${area.regionName.replace('リージョン', '')}・${area.areaName}`;
+    document.getElementById('field-progress').textContent =
+      `仲間: ${state.recruitedIds.length}/9 | 中ボス: ${state.defeatedMidBosses.length}/3 | 薬:${state.potions}`;
+
+    const strip = document.getElementById('party-strip');
+    strip.innerHTML = '';
+    const squadList = getActiveSquadMembers();
+    squadList.forEach((m, idx) => {
+      const chip = document.createElement('div');
+      chip.className = 'party-chip' + (idx === 0 ? ' leader' : '');
+      chip.innerHTML = `
+        <img src="${getPortraitSVG(m, m.hp > 0 ? 'smile' : 'hit', 24, 32)}" alt="${m.name}" />
+        <div>
+          <div style="font-weight:800;">${m.name} <span style="color:var(--accent-cyan);">[${m.race}]</span></div>
+          <div>HP ${m.hp}/${m.maxHp} <span style="color:var(--lp-col);">LP${m.lp}</span></div>
+        </div>
+      `;
+      strip.appendChild(chip);
+    });
+
+    drawFieldCanvas();
+  }
+
+  /* =========================================================
+     8. FIELD EXPLORATION, HiDPI RENDERING & TURN-SPACED SYMBOLS
+  ========================================================= */
+  const fieldCanvas = document.getElementById('field-canvas');
+  const fCtx = fieldCanvas.getContext('2d');
+
+  function syncCanvasResolution() {
+    const rect = fieldCanvas.getBoundingClientRect();
+    const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+    const targetW = Math.max(1, Math.round(rect.width * dpr));
+    const targetH = Math.max(1, Math.round(rect.height * dpr));
+    if (fieldCanvas.width !== targetW || fieldCanvas.height !== targetH) {
+      fieldCanvas.width = targetW;
+      fieldCanvas.height = targetH;
+    }
+    return { w: targetW, h: targetH, dpr };
+  }
+
+  function adjustHex(hex, amt) {
+    const clean = hex.replace('#', '');
+    const num = parseInt(clean, 16);
+    const r = Math.min(255, Math.max(0, (num >> 16) + amt));
+    const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00ff) + amt));
+    const b = Math.min(255, Math.max(0, (num & 0x0000ff) + amt));
+    return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  }
+
+  function drawSceneryTile(ctx, area, x, y, tileW, tileH) {
+    const t = area.map[y][x];
+    const px = x * tileW;
+    const py = y * tileH;
+
+    if (t === 1) {
+      ctx.fillStyle = adjustHex(area.groundCol, -8);
+      ctx.fillRect(px, py, tileW, tileH);
+
+      if (area.theme === 'beach' || area.theme === 'hill') {
+        ctx.fillStyle = '#5c3a21';
+        ctx.fillRect(px + tileW * 0.42, py + tileH * 0.52, tileW * 0.16, tileH * 0.34);
+        ctx.fillStyle = area.wallCol;
+        ctx.beginPath();
+        ctx.arc(px + tileW * 0.5, py + tileH * 0.4, tileW * 0.34, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (area.theme === 'arcade' || area.theme === 'lighthouse') {
+        ctx.fillStyle = area.wallCol;
+        ctx.fillRect(px + tileW * 0.1, py + tileH * 0.14, tileW * 0.8, tileH * 0.72);
+        ctx.fillStyle = '#ffd24c';
+        ctx.fillRect(px + tileW * 0.24, py + tileH * 0.28, tileW * 0.16, tileH * 0.14);
+        ctx.fillRect(px + tileW * 0.58, py + tileH * 0.28, tileW * 0.16, tileH * 0.14);
+      } else {
+        ctx.fillStyle = area.wallCol;
+        ctx.fillRect(px + tileW * 0.18, py + tileH * 0.18, tileW * 0.64, tileH * 0.64);
+        ctx.strokeStyle = '#ffd24c';
+        ctx.lineWidth = Math.max(1.5, tileW * 0.04);
+        ctx.strokeRect(px + tileW * 0.18, py + tileH * 0.18, tileW * 0.64, tileH * 0.64);
+      }
+      return;
+    }
+
+    if (t === 2) {
+      ctx.fillStyle = area.waterCol;
+      ctx.fillRect(px, py, tileW, tileH);
+      ctx.strokeStyle = 'rgba(200, 245, 255, 0.32)';
+      ctx.lineWidth = Math.max(1, tileW * 0.03);
+      ctx.beginPath();
+      ctx.moveTo(px + tileW * 0.18, py + tileH * 0.45);
+      ctx.lineTo(px + tileW * 0.78, py + tileH * 0.45);
+      ctx.stroke();
+      return;
+    }
+
+    ctx.fillStyle = (x + y) % 2 === 0 ? area.groundCol : adjustHex(area.groundCol, 12);
+    ctx.fillRect(px, py, tileW, tileH);
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(px + 0.5, py + 0.5, tileW - 1, tileH - 1);
+
+    if (t === 5) {
+      ctx.fillStyle = 'rgba(56, 224, 138, 0.34)';
+      ctx.beginPath();
+      ctx.arc(px + tileW * 0.5, py + tileH * 0.5, tileW * 0.34, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#a8ffcf';
+      ctx.font = `bold ${Math.round(tileH * 0.32)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('癒', px + tileW * 0.5, py + tileH * 0.52);
+    }
+  }
+
+  function stepOneSymbol(area, sym) {
+    if (!sym || state.defeatedSymbols.includes(sym.id)) return false;
+    const candX = sym.x + sym.dx;
+    const candY = sym.y + sym.dy;
+    const blockedByPlayer = candX === state.player.x && candY === state.player.y;
+    const blockedByOtherSym = (area.symbols || []).some(
+      other => other.id !== sym.id && !state.defeatedSymbols.includes(other.id) && other.x === candX && other.y === candY
+    );
+    if (
+      candX >= 1 && candX <= 8 &&
+      candY >= 1 && candY <= 8 &&
+      area.map[candY][candX] === 0 &&
+      !blockedByPlayer &&
+      !blockedByOtherSym
+    ) {
+      sym.x = candX;
+      sym.y = candY;
+      return true;
+    } else {
+      sym.dx *= -1;
+      sym.dy *= -1;
+      return false;
+    }
+  }
+
+  function triggerSymbolBattle(area, sym) {
+    const mDef = MUSE_DEFS.find(m => m.id === sym.enemyId) || MUSE_DEFS[0];
+    const baseHp = 68 + state.recruitedIds.length * 10;
+    const baseAtk = 15 + state.recruitedIds.length * 2;
+    startBattle('mob', {
+      symbolId: sym.id,
+      members: [{ ...mDef, hp: baseHp, maxHp: baseHp, atk: baseAtk, def: 8 + Math.floor(state.recruitedIds.length * 1.2) }]
+    });
+  }
+
+  function drawFieldCanvas() {
+    const { w, h, dpr } = syncCanvasResolution();
+    const area = AREAS[state.areaId] || AREAS.uchiura_beach;
+    const cols = 10;
+    const rows = 10;
+    const tileW = w / cols;
+    const tileH = h / rows;
+    const sprSize = Math.min(tileW, tileH) * 0.9;
+
+    fCtx.clearRect(0, 0, w, h);
+
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        drawSceneryTile(fCtx, area, x, y, tileW, tileH);
+      }
+    }
+
+    (area.portals || []).forEach(p => {
+      fCtx.fillStyle = 'rgba(56, 232, 255, 0.25)';
+      fCtx.strokeStyle = '#38e8ff';
+      fCtx.lineWidth = 2 * dpr;
+      fCtx.fillRect(p.x * tileW + 2 * dpr, p.y * tileH + 2 * dpr, tileW - 4 * dpr, tileH - 4 * dpr);
+      fCtx.strokeRect(p.x * tileW + 2 * dpr, p.y * tileH + 2 * dpr, tileW - 4 * dpr, tileH - 4 * dpr);
+      fCtx.fillStyle = '#e6fbff';
+      fCtx.font = `bold ${Math.round(tileH * 0.28)}px sans-serif`;
+      fCtx.textAlign = 'center';
+      fCtx.textBaseline = 'middle';
+      fCtx.fillText('出', (p.x + 0.5) * tileW, (p.y + 0.52) * tileH);
+    });
+
+    (area.recruits || []).forEach(r => {
+      if (!state.recruitedIds.includes(r.charId)) {
+        const def = AQOURS_DEFS.find(d => d.id === r.charId);
+        if (def) {
+          drawCuteFieldChar(fCtx, def, (r.x + 0.5) * tileW, (r.y + 0.5) * tileH, sprSize, { isEnemy: false });
+          fCtx.fillStyle = '#ffd24c';
+          fCtx.font = `bold ${Math.round(tileH * 0.22)}px sans-serif`;
+          fCtx.textAlign = 'center';
+          fCtx.fillText('仲', (r.x + 0.5) * tileW, r.y * tileH + tileH * 0.16);
+        }
+      }
+    });
+
+    (area.symbols || []).forEach(sym => {
+      if (!state.defeatedSymbols.includes(sym.id)) {
+        const mDef = MUSE_DEFS.find(m => m.id === sym.enemyId) || MUSE_DEFS[0];
+        drawCuteFieldChar(fCtx, mDef, (sym.x + 0.5) * tileW, (sym.y + 0.5) * tileH, sprSize, { isEnemy: true });
+      }
+    });
+
+    if (area.midBoss && !state.defeatedMidBosses.includes(area.midBoss.id)) {
+      const lead = MUSE_DEFS.find(m => m.id === area.midBoss.members[0]) || MUSE_DEFS[0];
+      drawCuteFieldChar(fCtx, lead, (area.midBoss.x + 0.5) * tileW, (area.midBoss.y + 0.5) * tileH, sprSize * 1.06, { isEnemy: true });
+      fCtx.fillStyle = '#ff7ab8';
+      fCtx.font = `bold ${Math.round(tileH * 0.2)}px sans-serif`;
+      fCtx.textAlign = 'center';
+      fCtx.fillText('中ボス', (area.midBoss.x + 0.5) * tileW, area.midBoss.y * tileH + tileH * 0.16);
+    }
+
+    if (area.finalBossTrigger) {
+      const fb = area.finalBossTrigger;
+      const honoka = MUSE_DEFS[0];
+      drawCuteFieldChar(fCtx, honoka, (fb.x + 0.5) * tileW, (fb.y + 0.5) * tileH, sprSize * 1.1, { isEnemy: true });
+      fCtx.fillStyle = '#ffd24c';
+      fCtx.font = `bold ${Math.round(tileH * 0.2)}px sans-serif`;
+      fCtx.textAlign = 'center';
+      fCtx.fillText('9vs9', (fb.x + 0.5) * tileW, fb.y * tileH + tileH * 0.16);
+    }
+
+    const leader = getActiveSquadMembers()[0] || AQOURS_DEFS[0];
+    const bob = state.player.stepTick % 2 === 1 ? -2 * dpr : 0;
+    drawCuteFieldChar(
+      fCtx,
+      leader,
+      (state.player.x + 0.5) * tileW,
+      (state.player.y + 0.5) * tileH,
+      sprSize,
+      { isEnemy: false, bob, facing: state.player.facing }
+    );
+  }
+
+  function movePlayer(dx, dy) {
+    if (state.screen !== 'field' || state.busyTurn || state.cutscene || document.getElementById('modal-backdrop').classList.contains('open')) return;
+    if (dx < 0) state.player.facing = 'left';
+    if (dx > 0) state.player.facing = 'right';
+    if (dy < 0) state.player.facing = 'up';
+    if (dy > 0) state.player.facing = 'down';
+
+    const area = AREAS[state.areaId] || AREAS.uchiura_beach;
+    const nx = state.player.x + dx;
+    const ny = state.player.y + dy;
+    if (nx < 0 || ny < 0 || nx >= 10 || ny >= 10) return;
+
+    const tile = area.map[ny][nx];
+    if (tile === 1 || tile === 2) {
+      setFieldLog('そこには進めないよ！');
+      drawFieldCanvas();
+      return;
+    }
+
+    const symOnTarget = (area.symbols || []).find(sym => !state.defeatedSymbols.includes(sym.id) && sym.x === nx && sym.y === ny);
+    if (symOnTarget) {
+      state.player.x = nx;
+      state.player.y = ny;
+      state.player.stepTick++;
+      drawFieldCanvas();
+      triggerSymbolBattle(area, symOnTarget);
+      return;
+    }
+
+    state.player.x = nx;
+    state.player.y = ny;
+    state.player.stepTick++;
+    Sound.sfxStep();
+
+    const portal = (area.portals || []).find(p => p.x === nx && p.y === ny);
+    if (portal && AREAS[portal.toArea]) {
+      state.areaId = portal.toArea;
+      state.player.x = portal.toX;
+      state.player.y = portal.toY;
+      const dest = AREAS[portal.toArea];
+      setFieldLog(`「${dest.regionName}・${dest.areaName}」へ移動した！`);
+      renderFieldUI();
+      return;
+    }
+
+    const recruit = (area.recruits || []).find(r => r.x === nx && r.y === ny && !state.recruitedIds.includes(r.charId));
+    if (recruit) {
+      const def = AQOURS_DEFS.find(d => d.id === recruit.charId);
+      renderFieldUI();
+      startCutscene(def.recruitDialogue, 'chika', def.id, () => {
+        addRecruitToRoster(recruit.charId);
+        Sound.sfxRecruit();
+        setFieldLog(`★ ${def.name} が仲間に加わった！`);
+        renderFieldUI();
+      });
+      return;
+    }
+
+    if (tile === 5) {
+      getAllRecruitedMembers().forEach(m => {
+        m.hp = m.maxHp;
+        m.wp = m.maxWp;
+        m.jp = m.maxJp;
+        if (m.lp < 2) m.lp = 2;
+      });
+      state.potions = Math.min(5, state.potions + 1);
+      Sound.sfxRecruit();
+      setFieldLog('光の泉で全員のHP・WP・JPが全快し、回復薬を1個補充した！');
+      renderFieldUI();
+      return;
+    }
+
+    if (area.midBoss && !state.defeatedMidBosses.includes(area.midBoss.id) && nx === area.midBoss.x && ny === area.midBoss.y) {
+      renderFieldUI();
+      const lines = BOSS_DIALOGUES[area.midBoss.id] || [];
+      startCutscene(lines, 'chika', area.midBoss.members[0], () => {
+        startBattle('mid', area.midBoss);
+      });
+      return;
+    }
+
+    if (area.finalBossTrigger && nx === area.finalBossTrigger.x && ny === area.finalBossTrigger.y) {
+      if (state.recruitedIds.length < 9) {
+        setFieldLog(`μ'sの9人決戦にはAqours9人全員が必要だ！（現在 ${state.recruitedIds.length}/9人）`);
+        renderFieldUI();
+        return;
+      }
+      renderFieldUI();
+      startCutscene(BOSS_DIALOGUES.final, 'chika', 'honoka', () => {
+        startBattle('final', null);
+      });
+      return;
+    }
+
+    renderFieldUI();
+
+    const activeSyms = (area.symbols || []).filter(sym => !state.defeatedSymbols.includes(sym.id));
+    if (activeSyms.length > 0) {
+      state.busyTurn = true;
+      setTimeout(() => {
+        state.busyTurn = false;
+        if (state.screen !== 'field') return;
+        for (const sym of activeSyms) {
+          stepOneSymbol(area, sym);
+        }
+        drawFieldCanvas();
+        const adjacentOrHit = activeSyms.find(
+          sym => !state.defeatedSymbols.includes(sym.id) &&
+            (Math.abs(sym.x - state.player.x) + Math.abs(sym.y - state.player.y) <= 1)
+        );
+        if (adjacentOrHit) {
+          triggerSymbolBattle(area, adjacentOrHit);
+        }
+      }, 160);
+    }
+  }
+
+  /* =========================================================
+     9. BATTLE SYSTEM WITH PERSISTENT VFX LAYER & PACING
+  ========================================================= */
+  const wait = (ms) => new Promise(res => setTimeout(res, ms));
+
+  function showBanner(text) {
+    const el = document.getElementById('fx-banner');
+    el.textContent = text;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 1050);
+  }
+
+  function setTechDesc(text) {
+    document.getElementById('tech-desc-box').textContent = text;
+  }
+
+  // Spawn effect inside #battle-vfx-layer relative to target element center so renderBattle() never destroys it
+  function spawnBattleVfx(targetEl, vfxType, popText, isHeal = false) {
+    const vfxLayer = document.getElementById('battle-vfx-layer');
+    const screenEl = document.getElementById('battle-screen');
+    if (!vfxLayer || !screenEl) return;
+
+    let cx = screenEl.clientWidth * 0.5;
+    let cy = screenEl.clientHeight * 0.35;
+
+    if (targetEl) {
+      const sRect = screenEl.getBoundingClientRect();
+      const tRect = targetEl.getBoundingClientRect();
+      cx = tRect.left - sRect.left + tRect.width * 0.5;
+      cy = tRect.top - sRect.top + tRect.height * 0.45;
+    }
+
+    if (vfxType && vfxType !== 'none') {
+      const burst = document.createElement('div');
+      burst.className = 'vfx-burst';
+      burst.style.left = `${cx}px`;
+      burst.style.top = `${cy}px`;
+
+      const core = document.createElement('div');
+      if (vfxType === 'slash') core.className = 'vfx-slash-blade';
+      else if (vfxType === 'magic') core.className = 'vfx-magic-circle';
+      else if (vfxType === 'heal') core.className = 'vfx-heal-aura';
+      else core.className = 'vfx-slam-wave';
+
+      burst.appendChild(core);
+      vfxLayer.appendChild(burst);
+      setTimeout(() => burst.remove(), 680);
+    }
+
+    if (popText) {
+      const pop = document.createElement('div');
+      pop.className = 'dmg-popup-floating' + (isHeal ? ' heal-pop' : '');
+      pop.style.left = `${cx}px`;
+      pop.style.top = `${cy - 18}px`;
+      pop.textContent = popText;
+      vfxLayer.appendChild(pop);
+      setTimeout(() => pop.remove(), 880);
+    }
+  }
+
+  function triggerScreenShake() {
+    const scr = document.getElementById('battle-screen');
+    scr.classList.remove('screen-shake');
+    void scr.offsetWidth;
+    scr.classList.add('screen-shake');
+    setTimeout(() => scr.classList.remove('screen-shake'), 360);
+  }
+
+  function startBattle(kind, bossData) {
+    const isFinal = kind === 'final';
+    const allies = isFinal
+      ? getAllRecruitedMembers().filter(m => m.lp > 0)
+      : getActiveSquadMembers().filter(m => m.lp > 0);
+
+    if (allies.length === 0) {
+      const fallback = getAllRecruitedMembers()[0];
+      fallback.lp = 3;
+      fallback.hp = fallback.maxHp;
+      allies.push(fallback);
+    }
+
+    let enemies = [];
+    if (isFinal) {
+      enemies = MUSE_DEFS.map((mDef, idx) => ({
+        ...mDef,
+        hp: 155 + idx * 12,
+        maxHp: 155 + idx * 12,
+        atk: 26 + Math.floor(idx * 1.5),
+        def: 15
+      }));
+    } else if (kind === 'mid') {
+      enemies = bossData.members.map(id => {
+        const mDef = MUSE_DEFS.find(m => m.id === id);
+        return {
+          ...mDef,
+          hp: bossData.hp,
+          maxHp: bossData.hp,
+          atk: bossData.atk,
+          def: bossData.def
+        };
+      });
+    } else {
+      enemies = bossData.members;
+    }
+
+    state.battle = {
+      kind,
+      bossId: kind === 'mid' ? bossData.id : null,
+      symbolId: kind === 'mob' ? bossData.symbolId : null,
+      allies,
+      enemies,
+      actorIdx: 0,
+      targetIdx: 0,
+      combo: 0,
+      armedActionKey: null,
+      animating: false
+    };
+
+    Sound.setBGM(isFinal ? 'final' : kind === 'mid' ? 'mid' : 'mob');
+    showScreen('battle');
+    setBattleLog(
+      isFinal
+        ? '高海千歌「μ\'s9人全員が相手だ！Aqours9人の輝き、見せてやるんだから！」'
+        : `${enemies.map(e => e.name).join('・')}「${enemies[0].line}」`
+    );
+    renderBattle();
+  }
+
+  function setBattleLog(msg) {
+    document.getElementById('battle-log').textContent = msg;
+  }
+
+  function renderBattle() {
+    const b = state.battle;
+    if (!b) return;
+    const isFinal = b.kind === 'final';
+
+    document.getElementById('battle-type-label').textContent =
+      isFinal ? '最終決戦 9 vs 9' : b.kind === 'mid' ? '中ボス戦（3人組）' : 'μ\'s遭遇戦';
+    document.getElementById('combo-badge').textContent = `連携: ${b.combo}`;
+
+    const actor = b.allies[b.actorIdx] || b.allies[0];
+    document.getElementById('turn-actor-label').textContent = b.animating ? '演出中…' : `${actor.name} の番`;
+
+    const eStage = document.getElementById('enemy-stage');
+    eStage.className = 'enemy-stage' + (isFinal ? ' is-9vs9' : '');
+    eStage.innerHTML = '';
+
+    b.enemies.forEach((en, idx) => {
+      const dead = en.hp <= 0;
+      const div = document.createElement('div');
+      div.id = `enemy-unit-${idx}`;
+      div.className = 'enemy-unit' + (idx === b.targetIdx && !dead ? ' selected' : '') + (dead ? ' defeated' : '');
+      div.onclick = () => {
+        if (!b.animating && !dead) {
+          b.targetIdx = idx;
+          renderBattle();
+        }
+      };
+      const pct = Math.max(0, Math.round((en.hp / en.maxHp) * 100));
+      div.innerHTML = `
+        <img src="${getPortraitSVG(en, dead ? 'hit' : 'shout', isFinal ? 46 : 64, isFinal ? 62 : 86)}" alt="${en.name}" />
+        <div class="enemy-label">${en.name}</div>
+        <div class="enemy-hp-bar"><div class="enemy-hp-fill" style="width:${pct}%"></div></div>
+      `;
+      eStage.appendChild(div);
+    });
+
+    const aStage = document.getElementById('allies-stage');
+    aStage.className = 'allies-stage' + (isFinal ? ' is-9allies' : '');
+    aStage.innerHTML = '';
+
+    b.allies.forEach((al, idx) => {
+      const ko = al.hp <= 0;
+      const card = document.createElement('div');
+      card.id = `ally-card-${idx}`;
+      card.className = 'ally-card' + (idx === b.actorIdx && !b.animating ? ' active-turn' : '') + (ko ? ' ko' : '');
+      card.innerHTML = `
+        <img src="${getPortraitSVG(al, ko ? 'hit' : idx === b.actorIdx ? 'shout' : 'smile', isFinal ? 42 : 52, isFinal ? 56 : 70)}" alt="${al.name}" />
+        <div class="ally-name">${al.name}</div>
+        <div class="stat-mini">
+          <span>HP${al.hp}</span>
+          <span class="lp-tag">LP${al.lp}</span>
+        </div>
+        <div class="bar-track"><div class="bar-hp" style="width:${Math.max(0, (al.hp / al.maxHp) * 100)}%"></div></div>
+        <div class="stat-mini">
+          <span style="color:var(--wp-col);">WP${al.wp}</span>
+          <span style="color:var(--jp-col);">JP${al.jp}</span>
+        </div>
+      `;
+      aStage.appendChild(card);
+    });
+
+    renderCommands(actor);
+  }
+
+  function renderCommands(actor) {
+    const b = state.battle;
+    const grid = document.getElementById('cmd-grid');
+    grid.innerHTML = '';
+
+    const t1 = TECH_POOL[actor.techs[0]] || TECH_POOL.dash;
+    const t2 = TECH_POOL[actor.techs[1]] || TECH_POOL.wave;
+
+    const specs = [
+      {
+        key: 't1',
+        label: `技1:${t1.name} (${t1.wp > 0 ? `WP${t1.wp}` : `JP${t1.jp}`})`,
+        cls: 'cmd-btn tech',
+        disabled: b.animating || ((t1.wp > 0 && actor.wp < t1.wp) || (t1.jp > 0 && actor.jp < t1.jp)),
+        desc: `【${t1.name}】${t1.desc}`,
+        run: () => executePlayerTech(actor, t1)
+      },
+      {
+        key: 't2',
+        label: `技2:${t2.name} (${t2.wp > 0 ? `WP${t2.wp}` : `JP${t2.jp}`})`,
+        cls: 'cmd-btn spell',
+        disabled: b.animating || ((t2.wp > 0 && actor.wp < t2.wp) || (t2.jp > 0 && actor.jp < t2.jp)),
+        desc: `【${t2.name}】${t2.desc}`,
+        run: () => executePlayerTech(actor, t2)
+      },
+      {
+        key: 'item',
+        label: `回復薬 (残${state.potions})`,
+        cls: 'cmd-btn item',
+        disabled: b.animating || state.potions <= 0 || actor.hp >= actor.maxHp,
+        desc: '【回復薬】選択中の仲間のHPを65回復する。',
+        run: () => executePotion(actor)
+      },
+      {
+        key: 'charge',
+        label: '気合溜め (WP/JP+6)',
+        cls: 'cmd-btn',
+        disabled: b.animating,
+        desc: '【気合溜め】WPとJPをそれぞれ6回復し、次の技に備える。',
+        run: () => executeCharge(actor)
+      }
+    ];
+
+    specs.forEach(sp => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      const isArmed = b.armedActionKey === sp.key && !b.animating;
+      btn.className = sp.cls + (isArmed ? ' armed' : '');
+      btn.textContent = isArmed ? `▶ ${sp.label}` : sp.label;
+      btn.disabled = sp.disabled;
+
+      btn.onmouseenter = () => setTechDesc(sp.desc);
+
+      btn.onclick = () => {
+        if (sp.disabled) return;
+        if (b.armedActionKey === sp.key) {
+          b.armedActionKey = null;
+          sp.run();
+        } else {
+          b.armedActionKey = sp.key;
+          setTechDesc(`${sp.desc}（もう一度タップで発動）`);
+          renderBattle();
+        }
+      };
+
+      grid.appendChild(btn);
+    });
+  }
+
+  async function executePotion(actor) {
+    const b = state.battle;
+    b.animating = true;
+    renderBattle();
+    state.potions--;
+    const heal = 65;
+    actor.hp = Math.min(actor.maxHp, actor.hp + heal);
+    setBattleLog(`${actor.name}「${actor.catchphrase}」回復薬でHP+${heal}！`);
+    Sound.sfxSkill('heal', 'potion');
+    const cardEl = document.getElementById(`ally-card-${b.actorIdx}`);
+    spawnBattleVfx(cardEl, 'heal', `+${heal}`, true);
+    renderBattle();
+    await wait(660);
+    await advanceBattleTurn();
+  }
+
+  async function executeCharge(actor) {
+    const b = state.battle;
+    b.animating = true;
+    renderBattle();
+    actor.wp = Math.min(actor.maxWp, actor.wp + 6);
+    actor.jp = Math.min(actor.maxJp, actor.jp + 6);
+    setBattleLog(`${actor.name}「${actor.firstPerson}、もっと輝ける…！」WP/JP+6！`);
+    Sound.sfxSkill('heal', 'charge');
+    const cardEl = document.getElementById(`ally-card-${b.actorIdx}`);
+    spawnBattleVfx(cardEl, 'heal', 'WP/JP+6', true);
+    renderBattle();
+    await wait(620);
+    await advanceBattleTurn();
+  }
+
+  async function executePlayerTech(actor, tech) {
+    const b = state.battle;
+    b.animating = true;
+    renderBattle();
+
+    if (tech.wp > 0) actor.wp = Math.max(0, actor.wp - tech.wp);
+    if (tech.jp > 0) actor.jp = Math.max(0, actor.jp - tech.jp);
+
+    if (b.enemies[b.targetIdx].hp <= 0) {
+      const aliveIdx = b.enemies.findIndex(e => e.hp > 0);
+      if (aliveIdx >= 0) b.targetIdx = aliveIdx;
+    }
+    const target = b.enemies[b.targetIdx];
+
+    setBattleLog(`${actor.name}が「${tech.name}」を放つ！ → ${target.name}`);
+    const actorEl = document.getElementById(`ally-card-${b.actorIdx}`);
+    if (actorEl) actorEl.classList.add('anim-lunge-ally');
+    await wait(240);
+
+    b.combo++;
+    const comboMult = 1 + (b.combo - 1) * 0.22;
+    const stat = tech.kind === 'spell' ? actor.mag : actor.atk;
+    const raw = Math.max(12, Math.round((stat * tech.power - target.def * 0.55) * comboMult));
+    target.hp = Math.max(0, target.hp - raw);
+
+    Sound.sfxSkill(tech.vfx, tech.id);
+    if (tech.vfx === 'slam' || tech.id === 'zura') {
+      triggerScreenShake();
+    }
+
+    const targetEl = document.getElementById(`enemy-unit-${b.targetIdx}`);
+    if (targetEl) targetEl.classList.add('anim-hit');
+    spawnBattleVfx(targetEl, tech.vfx, `-${raw}`, false);
+
+    if (b.combo >= 2) {
+      Sound.sfxCombo(b.combo);
+      showBanner(`${b.combo}連携!!`);
+    }
+
+    let glimmerMsg = '';
+    const nextId = GLIMMER_MAP[tech.id];
+    if (nextId && !actor.techs.includes(nextId) && Math.random() < 0.34) {
+      actor.techs.push(nextId);
+      const learned = TECH_POOL[nextId];
+      glimmerMsg = ` ★閃き！「${learned.name}」習得！`;
+      Sound.sfxGlimmer();
+      showBanner(`閃き！${learned.name}`);
+    }
+
+    applyRaceGrowth(actor);
+    setBattleLog(`${target.name}に ${raw} ダメージ！${glimmerMsg}`);
+    renderBattle();
+
+    await wait(660);
+
+    if (b.enemies.every(e => e.hp <= 0)) {
+      b.animating = false;
+      winBattle();
+      return;
+    }
+
+    await advanceBattleTurn();
+  }
+
+  function applyRaceGrowth(actor) {
+    if (actor.race === '人間') {
+      actor.maxHp += 3;
+      actor.hp = Math.min(actor.maxHp, actor.hp + 3);
+      actor.atk += 1;
+      actor.maxWp += 1;
+    } else if (actor.race === '妖魔') {
+      actor.maxJp += 2;
+      actor.jp = Math.min(actor.maxJp, actor.jp + 2);
+      actor.mag += 2;
+    } else if (actor.race === 'メカ') {
+      actor.def += 2;
+      actor.maxHp += 4;
+      actor.hp = Math.min(actor.maxHp, actor.hp + 4);
+    } else if (actor.race === 'モンスター') {
+      actor.maxHp += 5;
+      actor.hp = Math.min(actor.maxHp, actor.hp + 5);
+      actor.atk += 1;
+      actor.mag += 1;
+    }
+  }
+
+  async function advanceBattleTurn() {
+    const b = state.battle;
+    b.armedActionKey = null;
+    let next = (b.actorIdx + 1) % b.allies.length;
+    let wrapped = false;
+    for (let i = 0; i < b.allies.length; i++) {
+      const candidate = (b.actorIdx + 1 + i) % b.allies.length;
+      if (candidate <= b.actorIdx) wrapped = true;
+      if (b.allies[candidate].hp > 0) {
+        next = candidate;
+        break;
+      }
+    }
+
+    if (wrapped || b.allies.every(a => a.hp <= 0)) {
+      await enemyPhase();
+    } else {
+      b.actorIdx = next;
+      b.animating = false;
+      renderBattle();
+    }
+  }
+
+  async function enemyPhase() {
+    const b = state.battle;
+    b.animating = true;
+    b.combo = 0;
+    renderBattle();
+    setBattleLog('― 相手のターン！μ\'sが動き出す… ―');
+    await wait(520);
+
+    for (let eIdx = 0; eIdx < b.enemies.length; eIdx++) {
+      const en = b.enemies[eIdx];
+      if (!en || en.hp <= 0) continue;
+
+      const aliveIndices = b.allies
+        .map((a, idx) => (a.hp > 0 ? idx : -1))
+        .filter(idx => idx >= 0);
+      if (aliveIndices.length === 0) break;
+
+      const vIdx = aliveIndices[Math.floor(Math.random() * aliveIndices.length)];
+      const victim = b.allies[vIdx];
+
+      setBattleLog(`${en.name}「${en.line}」→ ${victim.name}を狙う！`);
+      const enEl = document.getElementById(`enemy-unit-${eIdx}`);
+      if (enEl) enEl.classList.add('anim-lunge-enemy');
+      await wait(340);
+
+      const dmg = Math.max(8, Math.round(en.atk - victim.def * 0.5));
+      victim.hp = Math.max(0, victim.hp - dmg);
+      Sound.sfxEnemyAttack();
+
+      let koText = '';
+      if (victim.hp === 0) {
+        victim.lp = Math.max(0, victim.lp - 1);
+        Sound.sfxKo();
+        koText = `（${victim.name}のLP-1！）`;
+      }
+
+      const vicEl = document.getElementById(`ally-card-${vIdx}`);
+      if (vicEl) vicEl.classList.add('anim-hit');
+      spawnBattleVfx(vicEl, 'slam', `-${dmg}`, false);
+
+      setBattleLog(`${en.name}の攻撃！${victim.name}に ${dmg} ダメージ${koText}`);
+      renderBattle();
+      await wait(640);
+
+      if (b.allies.every(a => a.hp <= 0)) {
+        b.animating = false;
+        loseBattle();
+        return;
+      }
+    }
+
+    const firstAlive = b.allies.findIndex(a => a.hp > 0);
+    b.actorIdx = firstAlive >= 0 ? firstAlive : 0;
+    b.animating = false;
+    setBattleLog(`味方のターン！${b.allies[b.actorIdx].name}の行動を選ぼう。`);
+    renderBattle();
+  }
+
+  function winBattle() {
+    const b = state.battle;
+    if (b.kind === 'mid' && b.bossId && !state.defeatedMidBosses.includes(b.bossId)) {
+      state.defeatedMidBosses.push(b.bossId);
+    }
+    if (b.kind === 'mob' && b.symbolId && !state.defeatedSymbols.includes(b.symbolId)) {
+      state.defeatedSymbols.push(b.symbolId);
+    }
+
+    b.allies.forEach(a => {
+      if (a.hp <= 0 && a.lp > 0) a.hp = 1;
+      a.wp = Math.min(a.maxWp, a.wp + 5);
+      a.jp = Math.min(a.maxJp, a.jp + 5);
+    });
+
+    if (b.kind === 'final') {
+      state.finalBossCleared = true;
+      state.battle = null;
+      document.getElementById('story-portrait').src = getPortraitSVG(AQOURS_DEFS[0], 'shout', 54, 74);
+      document.getElementById('story-speaker').textContent = 'エンディング・勝利！';
+      document.getElementById('story-text').textContent =
+        '高海千歌「μ\'sのみんな、ありがとう！Aqours9人の想いが、新しいフロンティアを切り開いたよ！輝いたね、みんな！！」';
+      document.getElementById('btn-story-next').textContent = 'もう一度フィールドへ戻る';
+      showScreen('title');
+      return;
+    }
+
+    state.battle = null;
+    setFieldLog('勝利！Aqoursの経験と絆が深まった！');
+    showScreen('field');
+  }
+
+  function loseBattle() {
+    state.battle = null;
+    getAllRecruitedMembers().forEach(m => {
+      if (m.lp <= 0) m.lp = 2;
+      m.hp = m.maxHp;
+      m.wp = m.maxWp;
+      m.jp = m.maxJp;
+    });
+    state.areaId = 'uchiura_beach';
+    state.player = { x: 2, y: 5, facing: 'down', stepTick: 0 };
+    setFieldLog('力尽きて内浦の浜辺へ戻った…LPと体力を立て直して再挑戦しよう！');
+    showScreen('field');
+  }
+
+  /* =========================================================
+     10. MODALS: SQUADS (3x3) & SAVE / LOAD / DELETE
+  ========================================================= */
+  const backdrop = document.getElementById('modal-backdrop');
+  const modalTitle = document.getElementById('modal-title');
+  const modalBody = document.getElementById('modal-body');
+
+  function openModal(title, renderFn) {
+    modalTitle.textContent = title;
+    renderFn(modalBody);
+    backdrop.classList.add('open');
+  }
+
+  function closeModal() {
+    backdrop.classList.remove('open');
+    if (state.screen === 'field') renderFieldUI();
+  }
+
+  function renderSquadModal(container) {
+    container.innerHTML = `<div style="font-size:10px;color:var(--text-sub);">3人×3隊列（最大9人）。隊列をタップして出撃グループを切り替えられます。</div>`;
+    for (let s = 0; s < 3; s++) {
+      const box = document.createElement('div');
+      box.className = 'squad-group';
+      const isCur = state.activeSquad === s;
+      const head = document.createElement('div');
+      head.style.display = 'flex';
+      head.style.justifyContent = 'space-between';
+      head.style.marginBottom = '4px';
+      head.innerHTML = `<strong>第${s + 1}隊列 ${isCur ? '(出撃中)' : ''}</strong>`;
+
+      const selBtn = document.createElement('button');
+      selBtn.type = 'button';
+      selBtn.className = 'mini-btn' + (isCur ? ' active' : '');
+      selBtn.textContent = isCur ? '選択中' : 'この隊列にする';
+      selBtn.onclick = () => {
+        state.activeSquad = s;
+        renderSquadModal(container);
+      };
+      head.appendChild(selBtn);
+      box.appendChild(head);
+
+      const slots = document.createElement('div');
+      for (let slot = 0; slot < 3; slot++) {
+        const cid = state.squads[s][slot];
+        const m = cid ? state.members[cid] : null;
+        const pill = document.createElement('span');
+        pill.className = 'member-pill';
+        pill.textContent = m ? `${m.name}(${m.race})` : '空き枠';
+        pill.onclick = () => {
+          const allIds = state.recruitedIds;
+          if (allIds.length === 0) return;
+          const curIdx = cid ? allIds.indexOf(cid) : -1;
+          const nextId = allIds[(curIdx + 1) % allIds.length];
+          state.squads[s][slot] = nextId;
+          renderSquadModal(container);
+        };
+        slots.appendChild(pill);
+      }
+      box.appendChild(slots);
+      container.appendChild(box);
+    }
+  }
+
+  function loadSaveSlots() {
+    try {
+      return JSON.parse(localStorage.getItem(SAVE_KEY) || '{}');
+    } catch (_) {
+      return {};
+    }
+  }
+
+  function saveToSlot(slotNum) {
+    const all = loadSaveSlots();
+    all[slotNum] = {
+      savedAt: new Date().toLocaleString('ja-JP'),
+      areaId: state.areaId,
+      player: { ...state.player },
+      recruitedIds: [...state.recruitedIds],
+      members: JSON.parse(JSON.stringify(state.members)),
+      squads: JSON.parse(JSON.stringify(state.squads)),
+      activeSquad: state.activeSquad,
+      defeatedMidBosses: [...state.defeatedMidBosses],
+      defeatedSymbols: [...state.defeatedSymbols],
+      finalBossCleared: state.finalBossCleared,
+      potions: state.potions
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(all));
+    renderSaveModal(modalBody);
+  }
+
+  function applySaveSlot(slotNum) {
+    const all = loadSaveSlots();
+    const data = all[slotNum];
+    if (!data) return;
+    state.areaId = data.areaId || 'uchiura_beach';
+    state.player = data.player || { x: 2, y: 5, facing: 'down', stepTick: 0 };
+    state.recruitedIds = data.recruitedIds || ['chika'];
+    state.members = data.members || { chika: createMemberInstance(AQOURS_DEFS[0]) };
+    state.squads = data.squads || [['chika', null, null], [null, null, null], [null, null, null]];
+    state.activeSquad = data.activeSquad || 0;
+    state.defeatedMidBosses = data.defeatedMidBosses || [];
+    state.defeatedSymbols = data.defeatedSymbols || [];
+    state.finalBossCleared = !!data.finalBossCleared;
+    state.potions = typeof data.potions === 'number' ? data.potions : 3;
+    state.battle = null;
+    closeModal();
+    setFieldLog(`スロット${slotNum}からデータをロードしました。`);
+    showScreen('field');
+  }
+
+  function deleteSaveSlot(slotNum) {
+    const all = loadSaveSlots();
+    delete all[slotNum];
+    localStorage.setItem(SAVE_KEY, JSON.stringify(all));
+    renderSaveModal(modalBody);
+  }
+
+  function renderSaveModal(container) {
+    const all = loadSaveSlots();
+    container.innerHTML = '';
+    [1, 2, 3].forEach(slotNum => {
+      const d = all[slotNum];
+      const row = document.createElement('div');
+      row.className = 'slot-row';
+      row.innerHTML = d
+        ? `<div><strong>スロット ${slotNum}</strong>（${d.savedAt}）</div><div>仲間: ${d.recruitedIds.length}/9人 / 中ボス: ${d.defeatedMidBosses.length}/3撃破</div>`
+        : `<div><strong>スロット ${slotNum}</strong>（空きデータ）</div>`;
+
+      const btns = document.createElement('div');
+      btns.className = 'slot-btns';
+
+      const bSave = document.createElement('button');
+      bSave.type = 'button';
+      bSave.className = 'mini-btn active';
+      bSave.textContent = 'セーブ';
+      bSave.onclick = () => saveToSlot(slotNum);
+
+      const bLoad = document.createElement('button');
+      bLoad.type = 'button';
+      bLoad.className = 'mini-btn';
+      bLoad.textContent = 'ロード';
+      bLoad.disabled = !d;
+      bLoad.onclick = () => applySaveSlot(slotNum);
+
+      const bDel = document.createElement('button');
+      bDel.type = 'button';
+      bDel.className = 'mini-btn';
+      bDel.style.borderColor = 'rgba(255,89,131,0.6)';
+      bDel.style.color = '#ff8aa8';
+      bDel.textContent = '削除';
+      bDel.disabled = !d;
+      bDel.onclick = () => deleteSaveSlot(slotNum);
+
+      btns.append(bSave, bLoad, bDel);
+      row.appendChild(btns);
+      container.appendChild(row);
+    });
+  }
+
+  /* =========================================================
+     11. INPUT BINDINGS (Touch + Canvas Tap + PC Keys + Resize)
+  ========================================================= */
+  document.getElementById('btn-cutscene-next').onclick = advanceCutscene;
+
+  document.getElementById('btn-story-next').onclick = () => {
+    if (state.storyIdx < STORY_LINES.length - 1) {
+      state.storyIdx++;
+      renderStory();
+    } else {
+      state.storyIdx = 0;
+      renderStory();
+      showScreen('field');
+    }
+  };
+
+  document.getElementById('btn-open-save-title').onclick = () => openModal('セーブ / ロード / 削除', renderSaveModal);
+  document.getElementById('btn-save').onclick = () => openModal('セーブ / ロード / 削除', renderSaveModal);
+  document.getElementById('btn-squad').onclick = () => openModal('3×3 隊列編成', renderSquadModal);
+  document.getElementById('btn-sound').onclick = () => Sound.toggle();
+  document.getElementById('btn-modal-close').onclick = closeModal;
+  backdrop.onclick = e => {
+    if (e.target === backdrop) closeModal();
+  };
+
+  document.querySelectorAll('.pad-btn[data-dir]').forEach(btn => {
+    btn.onclick = () => {
+      const dir = btn.getAttribute('data-dir');
+      if (dir === 'up') movePlayer(0, -1);
+      if (dir === 'down') movePlayer(0, 1);
+      if (dir === 'left') movePlayer(-1, 0);
+      if (dir === 'right') movePlayer(1, 0);
+    };
+  });
+
+  fieldCanvas.addEventListener('pointerdown', e => {
+    if (state.screen !== 'field' || state.cutscene) return;
+    const rect = fieldCanvas.getBoundingClientRect();
+    const tx = Math.floor(((e.clientX - rect.left) / rect.width) * 10);
+    const ty = Math.floor(((e.clientY - rect.top) / rect.height) * 10);
+    const dx = tx - state.player.x;
+    const dy = ty - state.player.y;
+    if (dx === 0 && dy === 0) return;
+    if (Math.abs(dx) >= Math.abs(dy)) {
+      movePlayer(dx > 0 ? 1 : -1, 0);
+    } else {
+      movePlayer(0, dy > 0 ? 1 : -1);
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (state.screen === 'field') drawFieldCanvas();
+  });
+
+  window.addEventListener('keydown', e => {
+    if (backdrop.classList.contains('open')) {
+      if (e.key === 'Escape') closeModal();
+      return;
+    }
+
+    if (state.cutscene) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        advanceCutscene();
+      }
+      return;
+    }
+
+    const k = e.key.toLowerCase();
+    if (k === 's') {
+      openModal('セーブ / ロード / 削除', renderSaveModal);
+      return;
+    }
+
+    if (state.screen === 'title') {
+      if (k === 'enter' || k === ' ') {
+        e.preventDefault();
+        document.getElementById('btn-story-next').click();
+      }
+      return;
+    }
+
+    if (state.screen === 'field') {
+      if (k === 'arrowup' || k === 'w') { e.preventDefault(); movePlayer(0, -1); }
+      else if (k === 'arrowdown') { e.preventDefault(); movePlayer(0, 1); }
+      else if (k === 'arrowleft' || k === 'a') { e.preventDefault(); movePlayer(-1, 0); }
+      else if (k === 'arrowright' || k === 'd') { e.preventDefault(); movePlayer(1, 0); }
+      return;
+    }
+
+    if (state.screen === 'battle' && state.battle && !state.battle.animating) {
+      const b = state.battle;
+      if (k === 'q') {
+        for (let i = 1; i <= b.enemies.length; i++) {
+          const idx = (b.targetIdx - i + b.enemies.length) % b.enemies.length;
+          if (b.enemies[idx].hp > 0) { b.targetIdx = idx; renderBattle(); break; }
+        }
+      } else if (k === 'e') {
+        for (let i = 1; i <= b.enemies.length; i++) {
+          const idx = (b.targetIdx + i) % b.enemies.length;
+          if (b.enemies[idx].hp > 0) { b.targetIdx = idx; renderBattle(); break; }
+        }
+      } else if (['1', '2', '3', '4'].includes(k)) {
+        const btns = document.querySelectorAll('#cmd-grid .cmd-btn');
+        const targetBtn = btns[Number(k) - 1];
+        if (targetBtn && !targetBtn.disabled) targetBtn.click();
+      }
+    }
+  });
+
+  renderStory();
+})();
+</script>
+</body>
+</html>
