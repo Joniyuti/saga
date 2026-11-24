@@ -199,14 +199,62 @@
     margin-bottom: 6px;
   }
 
+  /* Ending Screen */
+  #ending-screen {
+    justify-content: space-between;
+    padding: 12px;
+    gap: 8px;
+    background: radial-gradient(circle at 50% 15%, rgba(255, 210, 76, 0.28), rgba(45, 20, 75, 0.85) 55%, rgba(8, 12, 26, 0.98) 100%);
+    overflow-y: auto;
+  }
+
+  .ending-card {
+    background: rgba(11, 16, 36, 0.9);
+    border: 1px solid var(--accent-gold);
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 0 22px rgba(255, 210, 76, 0.25);
+  }
+
+  .ending-title {
+    font-size: 17px;
+    font-weight: 900;
+    text-align: center;
+    color: var(--accent-gold);
+    margin: 2px 0 6px;
+    text-shadow: 0 0 12px rgba(255, 210, 76, 0.65);
+  }
+
+  .ending-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-top: 8px;
+    text-align: center;
+  }
+
+  .ending-stat-box {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 8px;
+    padding: 6px 4px;
+    font-size: 10px;
+  }
+
+  .ending-stat-val {
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--accent-cyan);
+  }
+
   .primary-btn {
     width: 100%;
-    padding: 11px;
+    padding: 10px;
     border-radius: 10px;
     border: 1px solid rgba(255, 220, 120, 0.65);
     background: linear-gradient(135deg, #ff6a26, #ff9d2e);
     color: #111;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 900;
     letter-spacing: 0.05em;
     cursor: pointer;
@@ -428,8 +476,8 @@
   .enemy-stage {
     position: relative;
     flex: 1 1 auto;
-    min-height: 122px;
-    max-height: 174px;
+    min-height: 112px;
+    max-height: 158px;
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -446,7 +494,7 @@
     grid-template-columns: repeat(5, 1fr);
     align-items: center;
     gap: 2px;
-    max-height: 192px;
+    max-height: 178px;
     padding: 3px;
   }
 
@@ -530,7 +578,6 @@
     100% { transform: translateX(0); filter: none; }
   }
 
-  /* Persistent VFX Layer inside #battle-screen so renderBattle() never wipes active effects */
   #battle-vfx-layer {
     position: absolute;
     inset: 0;
@@ -759,18 +806,18 @@
     flex: 0 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
   }
 
   .tech-desc-box {
     background: rgba(18, 28, 58, 0.96);
     border: 1px solid rgba(255, 210, 76, 0.45);
     border-radius: 7px;
-    padding: 5px 7px;
-    font-size: 9.8px;
-    line-height: 1.35;
+    padding: 4px 7px;
+    font-size: 9.5px;
+    line-height: 1.32;
     color: #fff3c4;
-    min-height: 34px;
+    min-height: 30px;
   }
 
   .battle-log {
@@ -778,9 +825,9 @@
     border: 1px solid var(--panel-border);
     border-radius: 7px;
     padding: 4px 7px;
-    font-size: 10px;
-    line-height: 1.35;
-    height: 38px;
+    font-size: 9.8px;
+    line-height: 1.32;
+    height: 34px;
     overflow-y: auto;
     color: #eef3ff;
   }
@@ -788,16 +835,16 @@
   .cmd-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 4px;
+    gap: 3px;
   }
 
   .cmd-btn {
-    padding: 6px 6px;
+    padding: 5px 6px;
     border-radius: 7px;
     border: 1px solid rgba(145, 195, 255, 0.35);
     background: rgba(20, 30, 62, 0.95);
     color: #fff;
-    font-size: 10px;
+    font-size: 9.6px;
     font-weight: 800;
     text-align: left;
     cursor: pointer;
@@ -819,6 +866,7 @@
 
   .cmd-btn.tech { border-color: rgba(255, 139, 61, 0.65); }
   .cmd-btn.spell { border-color: rgba(87, 166, 255, 0.65); }
+  .cmd-btn.glimmer-skill { border-color: rgba(255, 210, 76, 0.92); color: #fff4b8; }
   .cmd-btn.item { border-color: rgba(56, 224, 138, 0.65); }
 
   #key-legend {
@@ -915,6 +963,12 @@
     border: 1px solid rgba(56, 232, 255, 0.35);
     cursor: pointer;
   }
+
+  .member-pill.empty {
+    background: rgba(255, 255, 255, 0.04);
+    border-style: dashed;
+    color: var(--text-sub);
+  }
 </style>
 </head>
 <body>
@@ -955,7 +1009,7 @@
         <h1 class="hero-main">ラブライブフロンティア</h1>
         <p class="hero-desc">
           高海千歌ひとりから始まるリージョン＆エリア冒険。<br />
-          Aqours9人を集め、種族成長・閃き・連携でμ'sの頂点へ挑め！
+          Aqours9人を集め、種族成長・閃き上書き・連携でμ'sの頂点へ挑め！
         </p>
       </div>
 
@@ -970,6 +1024,47 @@
       <div>
         <button id="btn-story-next" class="primary-btn" type="button">物語を進める / 内浦へ出発</button>
         <button id="btn-open-save-title" class="secondary-btn" type="button">セーブデータのロード / 削除</button>
+      </div>
+    </section>
+
+    <section id="ending-screen" class="screen">
+      <div class="ending-card">
+        <div class="hero-sub" style="text-align:center;">GRAND FINALE · AQOURS × μ's</div>
+        <h2 class="ending-title">★ 輝きのフロンティア達成！ ★</h2>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <img id="ending-chika-img" src="" alt="高海千歌" style="width:56px;height:76px;border-radius:8px;flex:0 0 auto;" />
+          <img id="ending-honoka-img" src="" alt="高坂穂乃果" style="width:56px;height:76px;border-radius:8px;flex:0 0 auto;" />
+          <p id="ending-message" style="margin:0;font-size:11px;line-height:1.5;color:#f5f8ff;">
+            高海千歌「μ'sのみんな、ありがとう！9人全員で掴んだこの輝きは、私たちの新しいスタートラインだよ！」
+          </p>
+        </div>
+
+        <div class="ending-stats">
+          <div class="ending-stat-box">
+            <div>加入仲間</div>
+            <div id="end-recruits" class="ending-stat-val">9 / 9</div>
+          </div>
+          <div class="ending-stat-box">
+            <div>中ボス撃破</div>
+            <div id="end-midboss" class="ending-stat-val">3 / 3</div>
+          </div>
+          <div class="ending-stat-box">
+            <div>閃き発生数</div>
+            <div id="end-glimmers" class="ending-stat-val">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ending-card" style="font-size:10.5px;line-height:1.5;color:#dce6ff;">
+        <div style="font-weight:900;color:var(--accent-gold);margin-bottom:4px;">【スタッフ＆キャスト】</div>
+        <div>・主演：Aqours 9人（高海千歌 / 渡辺曜 / 桜内梨子 / 津島善子 / 国木田花丸 / 黒澤ルビィ / 松浦果南 / 黒澤ダイヤ / 小原鞠莉）</div>
+        <div>・頂点のライバル：μ's 9人（高坂穂乃果 / 南ことり / 園田海未 / 星空凛 / 西木野真姫 / 小泉花陽 / 絢瀬絵里 / 東條希 / 矢澤にこ）</div>
+        <div>・システム：閃き上書き・連携連鎖・種族成長・3×3隊列</div>
+      </div>
+
+      <div>
+        <button id="btn-ending-continue" class="primary-btn" type="button">フィールドで自由探索を続ける</button>
+        <button id="btn-ending-title" class="secondary-btn" type="button">タイトル画面へ戻る</button>
       </div>
     </section>
 
@@ -1090,6 +1185,15 @@
         bassType: 'square',
         leadVol: 0.026,
         bassVol: 0.034
+      },
+      ending: {
+        tempo: 220,
+        lead: [587.33, 783.99, 987.77, 1174.66, 1046.5, 880.0, 783.99, 987.77],
+        bass: [146.83, 0, 196.0, 0, 164.81, 0, 146.83, 0],
+        leadType: 'triangle',
+        bassType: 'sine',
+        leadVol: 0.035,
+        bassVol: 0.042
       }
     };
 
@@ -1165,16 +1269,16 @@
       if (vfxType === 'slash') {
         tone(1450, 0.11, 'sawtooth', 0.075, 0, 380);
         tone(1980, 0.09, 'triangle', 0.055, 0.03, 720);
-        if (techId === 'ruby' || techId === 'shiny') {
+        if (techId === 'ruby' || techId === 'shiny' || techId === 'miracle_wave') {
           tone(1600, 0.08, 'square', 0.045, 0.09, 900);
         }
       } else if (vfxType === 'slam') {
         tone(190, 0.16, 'sawtooth', 0.085, 0, 58);
         tone(95, 0.22, 'triangle', 0.08, 0.02, 42);
       } else if (vfxType === 'magic') {
-        if (techId === 'piano') {
+        if (techId === 'piano' || techId === 'moon_waltz' || techId === 'sun_harmony') {
           [783.99, 987.77, 1174.66, 1567.98].forEach((f, i) => tone(f, 0.16, 'sine', 0.065, i * 0.045));
-        } else if (techId === 'yohane') {
+        } else if (techId === 'yohane' || techId === 'angel_wing') {
           tone(620, 0.18, 'sawtooth', 0.065, 0, 185);
           tone(440, 0.2, 'square', 0.05, 0.06, 140);
         } else {
@@ -1200,7 +1304,7 @@
       sfxEnemyAttack,
       sfxStep: () => tone(310, 0.045, 'sine', 0.025),
       sfxGlimmer: () => {
-        [659.25, 880, 1046.5, 1318.5].forEach((n, i) => tone(n, 0.16, 'triangle', 0.08, i * 0.065));
+        [659.25, 880, 1046.5, 1318.5, 1567.98].forEach((n, i) => tone(n, 0.17, 'triangle', 0.085, i * 0.065));
       },
       sfxCombo: (c) => {
         const base = 523.25 + c * 65;
@@ -1218,29 +1322,45 @@
   })();
 
   /* =========================================================
-     2. CHARACTER DATA, SKILL VFX TYPES & DIALOGUES
+     2. CHARACTER DATA, EXPANDED TECHS, OVERWRITE GLIMMER & DIALOGUES
   ========================================================= */
   const TECH_POOL = {
-    dash:   { id: 'dash',   name: 'みかん突撃', wp: 2, jp: 0, power: 1.25, kind: 'phys',  vfx: 'slam',  desc: '衝撃突進（威力1.25倍）。連携の起点になり、サンシャイン連撃へ派生する可能性あり。' },
-    spark:  { id: 'spark',  name: 'サンシャイン連撃', wp: 5, jp: 0, power: 1.75, kind: 'phys',  vfx: 'slash', desc: '光あふれる連続突撃（威力1.75倍）。高揚した気迫で敵単体にまとまった打撃を与える。' },
-    wave:   { id: 'wave',   name: 'ヨーソロー斬り', wp: 4, jp: 0, power: 1.55, kind: 'phys',  vfx: 'slash', desc: '海風のように鋭い一閃（威力1.55倍）。全速前進・大海原へ派生する可能性あり。' },
-    tide:   { id: 'tide',   name: '全速前進・大海原', wp: 8, jp: 0, power: 2.25, kind: 'phys',  vfx: 'slam',  desc: '荒波を割る強力な突貫技（威力2.25倍）。WP消費が大きいぶん高いダメージを狙える。' },
-    ruby:   { id: 'ruby',   name: 'がんばルビィ乱舞', wp: 5, jp: 0, power: 1.80, kind: 'phys',  vfx: 'slash', desc: '全力の気合を込めた連続斬撃（威力1.80倍）。シャイニー・ブレイクへ派生する可能性あり。' },
-    shiny:  { id: 'shiny',  name: 'シャイニー・ブレイク', wp: 9, jp: 0, power: 2.45, kind: 'phys',  vfx: 'slash', desc: '眩い輝きを放つ高威力フィニッシュ技（威力2.45倍）。連携に乗せると大ダメージ。' },
-    hug:    { id: 'hug',    name: 'ダイビング・タックル', wp: 6, jp: 0, power: 1.90, kind: 'phys',  vfx: 'slam',  desc: '力強い踏み込みから放つ重撃（威力1.90倍）。シャイニー・ブレイクへ派生する可能性あり。' },
-    dia:    { id: 'dia',    name: '凛然・一刀両断', wp: 7, jp: 0, power: 2.05, kind: 'phys',  vfx: 'slash', desc: '気品と鋭さを併せ持つ剣技（威力2.05倍）。硬い相手にも安定したダメージを与える。' },
-    yohane: { id: 'yohane', name: 'リトルデーモン降臨', wp: 0, jp: 6, power: 1.95, kind: 'spell', vfx: 'magic', desc: '魔力依存の闇術（威力1.95倍）。JPを6消費し、丸子・天地鳴動ずらへ派生する可能性あり。' },
-    piano:  { id: 'piano',  name: '旋律の浄化光', wp: 0, jp: 5, power: 1.75, kind: 'spell', vfx: 'magic', desc: '魔力依存の光術（威力1.75倍）。JPを5消費し、リトルデーモン降臨へ派生する可能性あり。' },
-    zura:   { id: 'zura',   name: '丸子・天地鳴動ずら', wp: 0, jp: 7, power: 2.15, kind: 'spell', vfx: 'magic', desc: '魔力依存の大地術（威力2.15倍）。JPを7消費して深い響きで敵を打ち据える。' }
+    dash:         { id: 'dash',         name: 'みかん突撃',         wp: 2,  jp: 0, power: 1.25, kind: 'phys',  vfx: 'slam',  desc: '衝撃突進（威力1.25倍）。閃き：サンシャイン連撃 / みかん流星群 / 青空スプリントへ派生。' },
+    spark:        { id: 'spark',        name: 'サンシャイン連撃',   wp: 5,  jp: 0, power: 1.80, kind: 'phys',  vfx: 'slash', desc: '光あふれる連続突撃（威力1.80倍）。閃き：シャイニー・ブレイク / MIRACLE WAVEへ派生。' },
+    wave:         { id: 'wave',         name: 'ヨーソロー斬り',     wp: 4,  jp: 0, power: 1.55, kind: 'phys',  vfx: 'slash', desc: '海風のように鋭い一閃（威力1.55倍）。閃き：全速前進・大海原 / 青空スプリントへ派生。' },
+    tide:         { id: 'tide',         name: '全速前進・大海原',   wp: 8,  jp: 0, power: 2.30, kind: 'phys',  vfx: 'slam',  desc: '荒波を割る強力な突貫技（威力2.30倍）。閃き：MIRACLE WAVE / シャイニー・ブレイクへ派生。' },
+    ruby:         { id: 'ruby',         name: 'がんばルビィ乱舞',   wp: 5,  jp: 0, power: 1.80, kind: 'phys',  vfx: 'slash', desc: '全力の気合を込めた連続斬撃（威力1.80倍）。閃き：青空スプリント / MIRACLE WAVEへ派生。' },
+    shiny:        { id: 'shiny',        name: 'シャイニー・ブレイク', wp: 9,  jp: 0, power: 2.50, kind: 'phys',  vfx: 'slash', desc: '眩い輝きを放つ高威力フィニッシュ技（威力2.50倍）。閃き：MIRACLE WAVEへ派生。' },
+    hug:          { id: 'hug',          name: 'ダイビング・タックル', wp: 6,  jp: 0, power: 1.90, kind: 'phys',  vfx: 'slam',  desc: '力強い踏み込みから放つ重撃（威力1.90倍）。閃き：みかん流星群 / MIRACLE WAVEへ派生。' },
+    dia:          { id: 'dia',          name: '凛然・一刀両断',     wp: 7,  jp: 0, power: 2.05, kind: 'phys',  vfx: 'slash', desc: '気品と鋭さを併せ持つ剣技（威力2.05倍）。閃き：MIRACLE WAVE / 全速前進・大海原へ派生。' },
+    mikan_meteor: { id: 'mikan_meteor', name: 'みかん流星群',       wp: 7,  jp: 0, power: 2.15, kind: 'slam' === 'slam' ? 'phys' : 'phys', vfx: 'slam',  desc: '無数の輝きが降り注ぐ重撃（威力2.15倍）。閃き：MIRACLE WAVEへ派生。' },
+    sora_rush:    { id: 'sora_rush',    name: '青空スプリント',     wp: 4,  jp: 0, power: 1.65, kind: 'phys',  vfx: 'slash', desc: '青い空を駆ける疾風斬撃（威力1.65倍）。閃き：サンシャイン連撃 / MIRACLE WAVEへ派生。' },
+    miracle_wave: { id: 'miracle_wave', name: 'MIRACLE WAVE',       wp: 10, jp: 0, power: 2.75, kind: 'phys',  vfx: 'slash', desc: '奇跡の波を起こす究極の物理奥義（威力2.75倍）。' },
+
+    yohane:       { id: 'yohane',       name: 'リトルデーモン降臨', wp: 0,  jp: 6, power: 1.95, kind: 'spell', vfx: 'magic', desc: '魔力依存の闇術（威力1.95倍）。閃き：リトル・セラフィム / 丸子・天地鳴動ずらへ派生。' },
+    piano:        { id: 'piano',        name: '旋律の浄化光',       wp: 0,  jp: 5, power: 1.75, kind: 'spell', vfx: 'magic', desc: '魔力依存の光術（威力1.75倍）。閃き：月光ワルツ / 太陽のハーモニーへ派生。' },
+    zura:         { id: 'zura',         name: '丸子・天地鳴動ずら', wp: 0,  jp: 7, power: 2.25, kind: 'spell', vfx: 'magic', desc: '魔力依存の大地術（威力2.25倍）。閃き：太陽のハーモニー / リトル・セラフィムへ派生。' },
+    moon_waltz:   { id: 'moon_waltz',   name: '月光ワルツ',         wp: 0,  jp: 6, power: 1.85, kind: 'spell', vfx: 'magic', desc: '静かな月光を纏う魔術（威力1.85倍）。閃き：リトル・セラフィム / 太陽のハーモニーへ派生。' },
+    angel_wing:   { id: 'angel_wing',   name: 'リトル・セラフィム', wp: 0,  jp: 8, power: 2.35, kind: 'spell', vfx: 'magic', desc: '堕天使の翼が放つ高威力魔術（威力2.35倍）。閃き：太陽のハーモニーへ派生。' },
+    sun_harmony:  { id: 'sun_harmony',  name: '太陽のハーモニー',   wp: 0,  jp: 9, power: 2.60, kind: 'spell', vfx: 'magic', desc: '太陽の光を束ねる最高峰の術法（威力2.60倍）。' }
   };
 
-  const GLIMMER_MAP = {
-    dash: 'spark',
-    wave: 'tide',
-    ruby: 'shiny',
-    hug: 'shiny',
-    yohane: 'zura',
-    piano: 'yohane'
+  const GLIMMER_CANDIDATES = {
+    dash:         ['spark', 'mikan_meteor', 'sora_rush', 'tide'],
+    spark:        ['shiny', 'miracle_wave', 'tide'],
+    wave:         ['sora_rush', 'tide', 'spark'],
+    tide:         ['miracle_wave', 'shiny', 'mikan_meteor'],
+    ruby:         ['sora_rush', 'spark', 'miracle_wave'],
+    shiny:        ['miracle_wave', 'mikan_meteor'],
+    hug:          ['mikan_meteor', 'tide', 'miracle_wave'],
+    dia:          ['tide', 'miracle_wave', 'sora_rush'],
+    mikan_meteor: ['miracle_wave', 'shiny'],
+    sora_rush:    ['spark', 'tide', 'miracle_wave'],
+    yohane:       ['angel_wing', 'zura', 'moon_waltz'],
+    piano:        ['moon_waltz', 'sun_harmony', 'yohane'],
+    zura:         ['sun_harmony', 'angel_wing', 'moon_waltz'],
+    moon_waltz:   ['angel_wing', 'sun_harmony'],
+    angel_wing:   ['sun_harmony', 'zura']
   };
 
   const AQOURS_DEFS = [
@@ -1257,7 +1377,7 @@
       hair: '#b87842', eye: '#d49428', hairStyle: 'short_you',
       firstPerson: '私', catchphrase: 'ヨーソロー！',
       maxHp: 132, maxWp: 26, maxJp: 10, lp: 7, atk: 23, mag: 13, def: 16, spd: 23,
-      techs: ['wave', 'dash'],
+      techs: ['wave', 'sora_rush'],
       recruitDialogue: [
         { speaker: '高海千歌', charId: 'chika', expr: 'shout', text: '曜ちゃん！海辺で何してたの？私たちの冒険、一緒にやってみようよ！' },
         { speaker: '渡辺曜', charId: 'you', expr: 'smile', text: '千歌ちゃん！もちろん、ヨーソロー！海の向こうのフロンティアまで全速前進だね！' }
@@ -1268,7 +1388,7 @@
       hair: '#8a3b34', eye: '#5d46b8', hairStyle: 'long_riko',
       firstPerson: '私', catchphrase: 'ちょっと待って！',
       maxHp: 118, maxWp: 14, maxJp: 30, lp: 6, atk: 15, mag: 26, def: 14, spd: 18,
-      techs: ['piano', 'dash'],
+      techs: ['piano', 'moon_waltz'],
       recruitDialogue: [
         { speaker: '桜内梨子', charId: 'riko', expr: 'smile', text: 'ちょっと待って！ここ内浦の風って、なんだか不思議な旋律が聴こえる…' },
         { speaker: '高海千歌', charId: 'chika', expr: 'smile', text: '梨子ちゃんのピアノと術の力があれば、きっともっと強く輝けるよ！' }
@@ -1279,7 +1399,7 @@
       hair: '#1e2648', eye: '#e5b828', hairStyle: 'twin_yoshiko',
       firstPerson: 'ヨハネ', catchphrase: '堕天使ヨハネです！',
       maxHp: 124, maxWp: 14, maxJp: 34, lp: 6, atk: 16, mag: 28, def: 13, spd: 20,
-      techs: ['yohane', 'piano'],
+      techs: ['yohane', 'moon_waltz'],
       recruitDialogue: [
         { speaker: '津島善子', charId: 'yoshiko', expr: 'shout', text: 'フフフ…沼津の街に呼ばれし堕天使ヨハネです！…って、千歌ちゃんたちなの！？' },
         { speaker: '高海千歌', charId: 'chika', expr: 'smile', text: '善子ちゃん、妖魔の魔術の力、μ\'sとの戦いでも貸してほしいな！' }
@@ -1290,7 +1410,7 @@
       hair: '#6e472b', eye: '#d9a426', hairStyle: 'bob_hanamaru',
       firstPerson: 'おいら', catchphrase: '〜ずら',
       maxHp: 148, maxWp: 18, maxJp: 24, lp: 8, atk: 21, mag: 22, def: 19, spd: 15,
-      techs: ['zura', 'dash'],
+      techs: ['zura', 'mikan_meteor'],
       recruitDialogue: [
         { speaker: '国木田花丸', charId: 'hanamaru', expr: 'smile', text: 'おいら本がいっぱい読めて嬉しいずら〜！千歌ちゃん、ずら丸もついていくずら！' },
         { speaker: '渡辺曜', charId: 'you', expr: 'smile', text: '花丸ちゃんのタフさと大地を揺らす術、心強いね！' }
@@ -1301,7 +1421,7 @@
       hair: '#ff598c', eye: '#d9386b', hairStyle: 'twin_ruby',
       firstPerson: 'ルビィ', catchphrase: 'がんばルビィ！',
       maxHp: 112, maxWp: 24, maxJp: 18, lp: 6, atk: 18, mag: 19, def: 13, spd: 24,
-      techs: ['ruby', 'dash'],
+      techs: ['ruby', 'sora_rush'],
       recruitDialogue: [
         { speaker: '黒澤ルビィ', charId: 'ruby', expr: 'shout', text: 'ルビィ、ちょっと怖いけど…みんなとなら、がんばルビィ！' },
         { speaker: '高海千歌', charId: 'chika', expr: 'shout', text: 'うん、一緒に行こうルビィちゃん！みんなで大きな輪を作ろう！' }
@@ -1312,7 +1432,7 @@
       hair: '#117a78', eye: '#18a89e', hairStyle: 'side_kanan',
       firstPerson: '私', catchphrase: 'ハグしよ！',
       maxHp: 156, maxWp: 32, maxJp: 10, lp: 8, atk: 27, mag: 14, def: 20, spd: 20,
-      techs: ['hug', 'wave'],
+      techs: ['hug', 'mikan_meteor'],
       recruitDialogue: [
         { speaker: '松浦果南', charId: 'kanan', expr: 'smile', text: 'ここまで来たんだね、千歌！さあ、気合い入れていくよ〜！…ほら、ハグしよ！' },
         { speaker: '高海千歌', charId: 'chika', expr: 'shout', text: '果南ちゃん！3年生が揃ったら、もうどこへだって行ける気がするよ！' }
@@ -1334,7 +1454,7 @@
       hair: '#f7ca3e', eye: '#26b87a', hairStyle: 'wave_mari',
       firstPerson: '私', catchphrase: 'シャイニー！',
       maxHp: 150, maxWp: 30, maxJp: 22, lp: 7, atk: 26, mag: 23, def: 21, spd: 21,
-      techs: ['shiny', 'wave'],
+      techs: ['shiny', 'angel_wing'],
       recruitDialogue: [
         { speaker: '小原鞠莉', charId: 'mari', expr: 'shout', text: 'It\'s SHINY time!! 限界突破して、最高のステージを作りましょう！' },
         { speaker: '高海千歌', charId: 'chika', expr: 'shout', text: '鞠莉ちゃんも加わって、ついにAqours9人がひとつになったね！！' }
@@ -1769,7 +1889,7 @@
   /* =========================================================
      5. GAME STATE & SAVE / LOAD / DELETE
   ========================================================= */
-  const SAVE_KEY = 'lovelive_frontier_saves_v4';
+  const SAVE_KEY = 'lovelive_frontier_saves_v6';
 
   function createMemberInstance(def) {
     return {
@@ -1794,8 +1914,17 @@
       mag: def.mag,
       def: def.def,
       spd: def.spd,
-      techs: [...def.techs]
+      baseTechs: [...def.techs],
+      glimmerTech: null // Overwritten each time a new glimmer occurs
     };
+  }
+
+  function getMemberTechList(member) {
+    const list = [...(member.baseTechs || ['dash', 'wave']).slice(0, 2)];
+    if (member.glimmerTech && TECH_POOL[member.glimmerTech]) {
+      list.push(member.glimmerTech);
+    }
+    return list;
   }
 
   const state = {
@@ -1816,6 +1945,7 @@
     defeatedMidBosses: [],
     defeatedSymbols: [],
     finalBossCleared: false,
+    glimmerCount: 0,
     potions: 3,
     battle: null
   };
@@ -1828,8 +1958,8 @@
     },
     {
       charId: 'riko',
-      speaker: 'フロンティアの掟',
-      text: 'WP・JP・LPを管理し、戦闘中の「閃き」で新技を会得、「連携」でダメージを連鎖させよう。仲間は最大9人（3人×3隊列）まで集結する。'
+      speaker: '閃き上書き＆連携',
+      text: '技を繰り出して「閃き」を起こすと、閃き枠が新しい技にどんどん上書きされる！仲間と繋ぐ「連携」も狙おう。'
     },
     {
       charId: 'you',
@@ -1921,7 +2051,7 @@
   }
 
   /* =========================================================
-     7. SCREEN & UI RENDERING + HiDPI CANVAS SYNC
+     7. SCREEN & UI RENDERING (TITLE / ENDING / FIELD / BATTLE)
   ========================================================= */
   function showScreen(name) {
     state.screen = name;
@@ -1934,7 +2064,18 @@
     } else if (name === 'title') {
       Sound.setBGM('none');
       renderStory();
+    } else if (name === 'ending') {
+      Sound.setBGM('ending');
+      renderEnding();
     }
+  }
+
+  function renderEnding() {
+    document.getElementById('ending-chika-img').src = getPortraitSVG(AQOURS_DEFS[0], 'shout', 56, 76);
+    document.getElementById('ending-honoka-img').src = getPortraitSVG(MUSE_DEFS[0], 'smile', 56, 76);
+    document.getElementById('end-recruits').textContent = `${state.recruitedIds.length} / 9`;
+    document.getElementById('end-midboss').textContent = `${state.defeatedMidBosses.length} / 3`;
+    document.getElementById('end-glimmers').textContent = `${state.glimmerCount} 回`;
   }
 
   function renderStory() {
@@ -1953,7 +2094,7 @@
     const area = AREAS[state.areaId] || AREAS.uchiura_beach;
     document.getElementById('region-badge').textContent = `${area.regionName.replace('リージョン', '')}・${area.areaName}`;
     document.getElementById('field-progress').textContent =
-      `仲間: ${state.recruitedIds.length}/9 | 中ボス: ${state.defeatedMidBosses.length}/3 | 薬:${state.potions}`;
+      `仲間: ${state.recruitedIds.length}/9 | 中ボス: ${state.defeatedMidBosses.length}/3 | 閃き:${state.glimmerCount}`;
 
     const strip = document.getElementById('party-strip');
     strip.innerHTML = '';
@@ -2298,7 +2439,7 @@
   }
 
   /* =========================================================
-     9. BATTLE SYSTEM WITH PERSISTENT VFX LAYER & PACING
+     9. BATTLE SYSTEM WITH OVERWRITING GLIMMER, VFX, SOUND & ENDING
   ========================================================= */
   const wait = (ms) => new Promise(res => setTimeout(res, ms));
 
@@ -2306,14 +2447,13 @@
     const el = document.getElementById('fx-banner');
     el.textContent = text;
     el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 1050);
+    setTimeout(() => el.classList.remove('show'), 1150);
   }
 
   function setTechDesc(text) {
     document.getElementById('tech-desc-box').textContent = text;
   }
 
-  // Spawn effect inside #battle-vfx-layer relative to target element center so renderBattle() never destroys it
   function spawnBattleVfx(targetEl, vfxType, popText, isHeal = false) {
     const vfxLayer = document.getElementById('battle-vfx-layer');
     const screenEl = document.getElementById('battle-screen');
@@ -2458,7 +2598,7 @@
       };
       const pct = Math.max(0, Math.round((en.hp / en.maxHp) * 100));
       div.innerHTML = `
-        <img src="${getPortraitSVG(en, dead ? 'hit' : 'shout', isFinal ? 46 : 64, isFinal ? 62 : 86)}" alt="${en.name}" />
+        <img src="${getPortraitSVG(en, dead ? 'hit' : 'shout', isFinal ? 44 : 60, isFinal ? 58 : 80)}" alt="${en.name}" />
         <div class="enemy-label">${en.name}</div>
         <div class="enemy-hp-bar"><div class="enemy-hp-fill" style="width:${pct}%"></div></div>
       `;
@@ -2475,7 +2615,7 @@
       card.id = `ally-card-${idx}`;
       card.className = 'ally-card' + (idx === b.actorIdx && !b.animating ? ' active-turn' : '') + (ko ? ' ko' : '');
       card.innerHTML = `
-        <img src="${getPortraitSVG(al, ko ? 'hit' : idx === b.actorIdx ? 'shout' : 'smile', isFinal ? 42 : 52, isFinal ? 56 : 70)}" alt="${al.name}" />
+        <img src="${getPortraitSVG(al, ko ? 'hit' : idx === b.actorIdx ? 'shout' : 'smile', isFinal ? 40 : 48, isFinal ? 52 : 64)}" alt="${al.name}" />
         <div class="ally-name">${al.name}</div>
         <div class="stat-mini">
           <span>HP${al.hp}</span>
@@ -2498,45 +2638,44 @@
     const grid = document.getElementById('cmd-grid');
     grid.innerHTML = '';
 
-    const t1 = TECH_POOL[actor.techs[0]] || TECH_POOL.dash;
-    const t2 = TECH_POOL[actor.techs[1]] || TECH_POOL.wave;
+    const skillIds = getMemberTechList(actor);
+    const specs = [];
 
-    const specs = [
-      {
-        key: 't1',
-        label: `技1:${t1.name} (${t1.wp > 0 ? `WP${t1.wp}` : `JP${t1.jp}`})`,
-        cls: 'cmd-btn tech',
-        disabled: b.animating || ((t1.wp > 0 && actor.wp < t1.wp) || (t1.jp > 0 && actor.jp < t1.jp)),
-        desc: `【${t1.name}】${t1.desc}`,
-        run: () => executePlayerTech(actor, t1)
-      },
-      {
-        key: 't2',
-        label: `技2:${t2.name} (${t2.wp > 0 ? `WP${t2.wp}` : `JP${t2.jp}`})`,
-        cls: 'cmd-btn spell',
-        disabled: b.animating || ((t2.wp > 0 && actor.wp < t2.wp) || (t2.jp > 0 && actor.jp < t2.jp)),
-        desc: `【${t2.name}】${t2.desc}`,
-        run: () => executePlayerTech(actor, t2)
-      },
-      {
-        key: 'item',
-        label: `回復薬 (残${state.potions})`,
-        cls: 'cmd-btn item',
-        disabled: b.animating || state.potions <= 0 || actor.hp >= actor.maxHp,
-        desc: '【回復薬】選択中の仲間のHPを65回復する。',
-        run: () => executePotion(actor)
-      },
-      {
+    skillIds.forEach((tid, idx) => {
+      const tech = TECH_POOL[tid] || TECH_POOL.dash;
+      const isGlimmerSlot = idx === 2;
+      const costStr = tech.wp > 0 ? `WP${tech.wp}` : `JP${tech.jp}`;
+      specs.push({
+        key: `tech_${tid}_${idx}`,
+        label: `${isGlimmerSlot ? '★閃枠' : `技${idx + 1}`}:${tech.name} (${costStr})`,
+        cls: isGlimmerSlot ? 'cmd-btn glimmer-skill' : (tech.kind === 'spell' ? 'cmd-btn spell' : 'cmd-btn tech'),
+        disabled: b.animating || ((tech.wp > 0 && actor.wp < tech.wp) || (tech.jp > 0 && actor.jp < tech.jp)),
+        desc: `【${tech.name}${isGlimmerSlot ? '・閃き枠' : ''}】${tech.desc}`,
+        run: () => executePlayerTech(actor, tech)
+      });
+    });
+
+    specs.push({
+      key: 'item',
+      label: `回復薬 (残${state.potions})`,
+      cls: 'cmd-btn item',
+      disabled: b.animating || state.potions <= 0 || actor.hp >= actor.maxHp,
+      desc: '【回復薬】行動中の仲間のHPを65回復する。',
+      run: () => executePotion(actor)
+    });
+
+    if (specs.length < 4) {
+      specs.push({
         key: 'charge',
         label: '気合溜め (WP/JP+6)',
         cls: 'cmd-btn',
         disabled: b.animating,
-        desc: '【気合溜め】WPとJPをそれぞれ6回復し、次の技に備える。',
+        desc: '【気合溜め】WPとJPをそれぞれ6回復し、閃き・連携に備える。',
         run: () => executeCharge(actor)
-      }
-    ];
+      });
+    }
 
-    specs.forEach(sp => {
+    specs.slice(0, 4).forEach(sp => {
       const btn = document.createElement('button');
       btn.type = 'button';
       const isArmed = b.armedActionKey === sp.key && !b.animating;
@@ -2593,6 +2732,31 @@
     await advanceBattleTurn();
   }
 
+  // Overwrites member.glimmerTech every time a new glimmer triggers
+  function tryOverwriteGlimmerTech(actor, usedTechId, comboCount, battleKind) {
+    const cands = GLIMMER_CANDIDATES[usedTechId] || [];
+    const baseTwo = new Set((actor.baseTechs || []).slice(0, 2));
+    const available = cands.filter(cid => cid !== usedTechId && !baseTwo.has(cid) && TECH_POOL[cid]);
+    if (available.length === 0) return null;
+
+    const baseRate = battleKind === 'final' ? 0.62 : battleKind === 'mid' ? 0.55 : 0.48;
+    const rate = Math.min(0.88, baseRate + (comboCount - 1) * 0.08);
+    if (Math.random() < rate) {
+      // Prefer a fresh candidate different from current glimmerTech if possible
+      const fresh = available.filter(cid => cid !== actor.glimmerTech);
+      const pool = fresh.length > 0 ? fresh : available;
+      const pickedId = pool[Math.floor(Math.random() * pool.length)];
+      const prevId = actor.glimmerTech;
+      actor.glimmerTech = pickedId;
+      state.glimmerCount++;
+      return {
+        newTech: TECH_POOL[pickedId],
+        prevTech: prevId && TECH_POOL[prevId] ? TECH_POOL[prevId] : null
+      };
+    }
+    return null;
+  }
+
   async function executePlayerTech(actor, tech) {
     const b = state.battle;
     b.animating = true;
@@ -2619,7 +2783,7 @@
     target.hp = Math.max(0, target.hp - raw);
 
     Sound.sfxSkill(tech.vfx, tech.id);
-    if (tech.vfx === 'slam' || tech.id === 'zura') {
+    if (tech.vfx === 'slam' || tech.id === 'zura' || tech.id === 'mikan_meteor') {
       triggerScreenShake();
     }
 
@@ -2632,21 +2796,22 @@
       showBanner(`${b.combo}連携!!`);
     }
 
+    const glimmerRes = tryOverwriteGlimmerTech(actor, tech.id, b.combo, b.kind);
     let glimmerMsg = '';
-    const nextId = GLIMMER_MAP[tech.id];
-    if (nextId && !actor.techs.includes(nextId) && Math.random() < 0.34) {
-      actor.techs.push(nextId);
-      const learned = TECH_POOL[nextId];
-      glimmerMsg = ` ★閃き！「${learned.name}」習得！`;
+    if (glimmerRes) {
+      const { newTech, prevTech } = glimmerRes;
+      glimmerMsg = prevTech
+        ? ` ★閃き上書き！「${prevTech.name}」→「${newTech.name}」に書き換えた！`
+        : ` ★閃き！「${newTech.name}」を閃き枠に習得！`;
       Sound.sfxGlimmer();
-      showBanner(`閃き！${learned.name}`);
+      showBanner(`💡 閃き！${newTech.name}`);
     }
 
     applyRaceGrowth(actor);
     setBattleLog(`${target.name}に ${raw} ダメージ！${glimmerMsg}`);
     renderBattle();
 
-    await wait(660);
+    await wait(glimmerRes ? 880 : 660);
 
     if (b.enemies.every(e => e.hp <= 0)) {
       b.animating = false;
@@ -2778,12 +2943,8 @@
     if (b.kind === 'final') {
       state.finalBossCleared = true;
       state.battle = null;
-      document.getElementById('story-portrait').src = getPortraitSVG(AQOURS_DEFS[0], 'shout', 54, 74);
-      document.getElementById('story-speaker').textContent = 'エンディング・勝利！';
-      document.getElementById('story-text').textContent =
-        '高海千歌「μ\'sのみんな、ありがとう！Aqours9人の想いが、新しいフロンティアを切り開いたよ！輝いたね、みんな！！」';
-      document.getElementById('btn-story-next').textContent = 'もう一度フィールドへ戻る';
-      showScreen('title');
+      Sound.sfxGlimmer();
+      showScreen('ending');
       return;
     }
 
@@ -2807,7 +2968,7 @@
   }
 
   /* =========================================================
-     10. MODALS: SQUADS (3x3) & SAVE / LOAD / DELETE
+     10. MODALS: SQUADS (NO DUPLICATES!) & SAVE / LOAD / DELETE
   ========================================================= */
   const backdrop = document.getElementById('modal-backdrop');
   const modalTitle = document.getElementById('modal-title');
@@ -2824,8 +2985,41 @@
     if (state.screen === 'field') renderFieldUI();
   }
 
+  function getAssignedMemberIds() {
+    const used = new Set();
+    for (let s = 0; s < 3; s++) {
+      for (let slot = 0; slot < 3; slot++) {
+        const cid = state.squads[s][slot];
+        if (cid && state.members[cid]) used.add(cid);
+      }
+    }
+    return used;
+  }
+
+  function cycleSquadSlotWithoutDuplicate(s, slot) {
+    const curCid = state.squads[s][slot];
+    const usedElsewhere = getAssignedMemberIds();
+    if (curCid) usedElsewhere.delete(curCid);
+
+    const candidates = state.recruitedIds.filter(id => !usedElsewhere.has(id) && id !== curCid);
+
+    if (candidates.length > 0) {
+      state.squads[s][slot] = candidates[0];
+    } else if (curCid) {
+      const activeCount = (state.squads[state.activeSquad] || []).filter(Boolean).length;
+      if (s !== state.activeSquad || activeCount > 1) {
+        state.squads[s][slot] = null;
+      }
+    }
+  }
+
   function renderSquadModal(container) {
-    container.innerHTML = `<div style="font-size:10px;color:var(--text-sub);">3人×3隊列（最大9人）。隊列をタップして出撃グループを切り替えられます。</div>`;
+    const usedCount = getAssignedMemberIds().size;
+    container.innerHTML = `
+      <div style="font-size:10px;color:var(--text-sub);">
+        同一キャラの重複配置（分身）は不可です（配置中: ${usedCount}/${state.recruitedIds.length}人）。枠をタップして未配置メンバーを入れ替えます。
+      </div>
+    `;
     for (let s = 0; s < 3; s++) {
       const box = document.createElement('div');
       box.className = 'squad-group';
@@ -2841,6 +3035,12 @@
       selBtn.className = 'mini-btn' + (isCur ? ' active' : '');
       selBtn.textContent = isCur ? '選択中' : 'この隊列にする';
       selBtn.onclick = () => {
+        const hasAny = (state.squads[s] || []).some(Boolean);
+        if (!hasAny) {
+          const used = getAssignedMemberIds();
+          const fallback = state.recruitedIds.find(id => !used.has(id)) || state.recruitedIds[0];
+          if (fallback) state.squads[s][0] = fallback;
+        }
         state.activeSquad = s;
         renderSquadModal(container);
       };
@@ -2852,14 +3052,10 @@
         const cid = state.squads[s][slot];
         const m = cid ? state.members[cid] : null;
         const pill = document.createElement('span');
-        pill.className = 'member-pill';
+        pill.className = 'member-pill' + (m ? '' : ' empty');
         pill.textContent = m ? `${m.name}(${m.race})` : '空き枠';
         pill.onclick = () => {
-          const allIds = state.recruitedIds;
-          if (allIds.length === 0) return;
-          const curIdx = cid ? allIds.indexOf(cid) : -1;
-          const nextId = allIds[(curIdx + 1) % allIds.length];
-          state.squads[s][slot] = nextId;
+          cycleSquadSlotWithoutDuplicate(s, slot);
           renderSquadModal(container);
         };
         slots.appendChild(pill);
@@ -2890,6 +3086,7 @@
       defeatedMidBosses: [...state.defeatedMidBosses],
       defeatedSymbols: [...state.defeatedSymbols],
       finalBossCleared: state.finalBossCleared,
+      glimmerCount: state.glimmerCount,
       potions: state.potions
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(all));
@@ -2909,6 +3106,7 @@
     state.defeatedMidBosses = data.defeatedMidBosses || [];
     state.defeatedSymbols = data.defeatedSymbols || [];
     state.finalBossCleared = !!data.finalBossCleared;
+    state.glimmerCount = typeof data.glimmerCount === 'number' ? data.glimmerCount : 0;
     state.potions = typeof data.potions === 'number' ? data.potions : 3;
     state.battle = null;
     closeModal();
@@ -2979,6 +3177,16 @@
       renderStory();
       showScreen('field');
     }
+  };
+
+  document.getElementById('btn-ending-continue').onclick = () => {
+    setFieldLog('エンディング達成後も冒険を続けられます！仲間や閃き技をさらに極めよう！');
+    showScreen('field');
+  };
+
+  document.getElementById('btn-ending-title').onclick = () => {
+    state.storyIdx = 0;
+    showScreen('title');
   };
 
   document.getElementById('btn-open-save-title').onclick = () => openModal('セーブ / ロード / 削除', renderSaveModal);
